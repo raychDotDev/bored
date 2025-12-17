@@ -1,7 +1,13 @@
+#include "engine/entity.h"
+#include "engine/world.h"
 #include "fixed.h"
+#include "game/game.h"
+#include "game/screens/main_screen.h"
 #include <stdio.h>
 
 i32 main() {
-	printf("hi!\n");
-	return 0;
+    GameInit();
+    GameSetScreen(MainScreenNew());
+    GameRun();
+    return 0;
 }
