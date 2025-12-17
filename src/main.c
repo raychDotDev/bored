@@ -40,7 +40,7 @@ Enemy e_init = {
     .col_norm = {},
     .pos = {-80, -80},
     .rad = 12.f,
-    .speed = 1.5f,
+    .speed = 2.f,
     .vel = {},
 };
 #define ENEMY_COUNT 2
@@ -111,7 +111,7 @@ void g_draw() {
             DrawText(txt, ss.x / 2 - s / 2, ss.y / 2 - fs / 2 - fs * 2, fs,
                      WHITE);
         }
-        const char *txt = "PRESS [SPACE] TO START";
+        const char *txt = "PRESS [ENTER] TO START";
         i32 fs = 40;
         i32 s = MeasureText(txt, fs);
         DrawText(txt, ss.x / 2 - s / 2, ss.y / 2 - fs / 2, fs, WHITE);
@@ -140,7 +140,7 @@ void g_update() {
     cam.zoom = fabs(((f32)ss.x / (f32)world_bounds.x) * 0.6);
     cam.rotation = 0.f;
     if (stop) {
-        if (IsKeyPressed(KEY_SPACE)) {
+        if (IsKeyPressed(KEY_ENTER)) {
             g_reset();
             if (first_start)
                 first_start = false;
@@ -173,7 +173,7 @@ void g_update() {
         djump_left = djump_max;
     }
     if (jump && down) {
-        p.vel.y = p.jump_force;
+        p.vel.y = p.jump_force * 2;
     } else if ((p.col_norm.y < 0 && jump_buf && can_jump) ||
                (!down && djump_left > 0 && jump)) {
         p.vel.y = -p.jump_force;
@@ -189,7 +189,7 @@ void g_update() {
     }
     if (hor == 0 && p.col_norm.y != 0)
         p.vel.x = Vector2Lerp(p.vel, Vector2Zero(), steer * GetFrameTime()).x;
-    p.vel = Vector2ClampValue(p.vel, -p_max_vel, p_max_vel);
+    p.vel.x = Clamp(p.vel.x, -p_max_vel, p_max_vel);
     v2 next_pos = Vector2Add(p.pos, p.vel);
     if (next_pos.x - p.rad < world_bounds.x ||
         next_pos.x + p.rad >= world_bounds.x + world_bounds.width) {
@@ -223,7 +223,7 @@ void g_update() {
         Enemy enemy = e[i];
         v2 e_dir = Vector2Normalize(Vector2Subtract(p.pos, enemy.pos));
         enemy.vel.x += e_dir.x * enemy.speed * GetFrameTime();
-        enemy.vel.y += e_dir.y * (enemy.speed + GRAVITY) * GetFrameTime();
+        enemy.vel.y += e_dir.y * enemy.speed * GetFrameTime();
         v2 e_next_pos =
             Vector2Add(enemy.pos, Vector2Scale(enemy.vel, GetFrameTime()));
         if (e_next_pos.x + enemy.rad > world_bounds.x + world_bounds.width ||
@@ -246,12 +246,31 @@ void g_update() {
         for (i32 j = 0; j < ENEMY_COUNT; j++) {
             if (&e[i] == &e[j])
                 continue;
+            f32 dist = Vector2Distance(e[i].pos, e[j].pos);
             bool col =
                 CheckCollisionCircles(e[i].pos, e[i].rad, e[j].pos, e[j].rad);
-            if (col) {
+            if (col && dist < e[i].rad + e[j].rad + eps) {
                 v2 n = Vector2Normalize(Vector2Subtract(e[j].pos, e[i].pos));
-                e[i].vel = Vector2Reflect(e[i].vel, n);
-                e[j].vel = Vector2Reflect(e[j].vel, Vector2Negate(n));
+                n = (v2){
+                    n.x > 0   ? 1
+                    : n.x < 0 ? -1
+                              : 0,
+                    n.y > 0   ? 1
+                    : n.y < 0 ? -1
+                              : 0,
+                };
+                v2 n2 = Vector2Normalize(Vector2Subtract(e[i].pos, e[j].pos));
+                n2 = (v2){
+                    n2.x > 0   ? 1
+                    : n2.x < 0 ? -1
+                               : 0,
+                    n2.y > 0   ? 1
+                    : n2.y < 0 ? -1
+                               : 0,
+                };
+                // n = Vector2Scale(n, 1f);
+                e[i].vel = Vector2Multiply(e[i].vel, n);
+                e[j].vel = Vector2Multiply(e[j].vel, n2);
             }
         }
         e_next_pos =
