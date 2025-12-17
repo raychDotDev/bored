@@ -30,7 +30,7 @@ void g_draw();
 void g_update();
 Camera2D cam;
 const Rectangle world_bounds = {-400, -100, 800, 200};
-Player p_init = {.pos = (v2){0, 0},
+Player p_init = {.pos = (v2){-5.f, 0},
                  .vel = (v2){0, 0},
                  .rad = 10.f,
                  .speed = 10.f,
@@ -40,7 +40,7 @@ Enemy e_init = {
     .col_norm = {},
     .pos = {-80, -80},
     .rad = 12.f,
-    .speed = 2.f,
+    .speed = 2.5f,
     .vel = {},
 };
 #define ENEMY_COUNT 2
@@ -95,21 +95,36 @@ void g_draw() {
         DrawCircleV(e[i].pos, e[i].rad, MAROON);
     }
     EndMode2D();
+    Color pause_col = {100, 100, 100, 150};
     v2i ss = g_get_window_size();
     if (pause) {
-        DrawRectangle(0, 0, ss.x, ss.y, (Color){100, 100, 100, 100});
+        DrawRectangle(0, 0, ss.x, ss.y, pause_col);
         const char *txt = TextFormat("PRESS [ESCAPE] TO RESUME");
         i32 fs = 40;
         i32 s = MeasureText(txt, fs);
         DrawText(txt, ss.x / 2 - s / 2, ss.y / 2 - fs / 2 - fs, fs, WHITE);
     } else if (stop) {
-        DrawRectangle(0, 0, ss.x, ss.y, (Color){100, 100, 100, 100});
+        DrawRectangle(0, 0, ss.x, ss.y, pause_col);
         if (!first_start) {
             const char *txt = TextFormat("YOUR SCORE: %d SECOND(S)", (i32)time);
             i32 fs = 40;
             i32 s = MeasureText(txt, fs);
             DrawText(txt, ss.x / 2 - s / 2, ss.y / 2 - fs / 2 - fs * 2, fs,
                      WHITE);
+        } else {
+            const char *txt[4] = {
+                "[A]/[D] - MOVE;",
+                "[SPACE] - jump/double jump;",
+                "[S]+[SPACE] - stomp;",
+                "[LSHIFT] - horizontal dash",
+            };
+
+            i32 fs = 40;
+            for (i32 i = 0; i < 4; i++) {
+                i32 s = MeasureText(txt[i], fs);
+                DrawText(txt[i], ss.x / 2 - s / 2,
+                         ss.y / 2 - (fs * 4) - fs * (i), fs, WHITE);
+            }
         }
         const char *txt = "PRESS [ENTER] TO START";
         i32 fs = 40;
@@ -124,7 +139,8 @@ void g_reset() {
     for (i32 i = 0; i < ENEMY_COUNT; i++) {
         *&e[i] = e_init;
         *&e[i].pos.x = world_bounds.x +
-                       world_bounds.width / ENEMY_COUNT * (i + 0.5f) + e->rad;
+                       world_bounds.width / ENEMY_COUNT * (i + 0.5f) +
+                       e->rad * 0.5f;
     }
     time = 0;
 }
@@ -157,7 +173,7 @@ void g_update() {
     i32 hor = IsKeyDown(KEY_D) - IsKeyDown(KEY_A);
     bool down = IsKeyDown(KEY_S);
     bool jump = IsKeyPressed(KEY_SPACE);
-    if (jump) {
+    if (jump && !down) {
         jump_timer = GetTime();
         jump_buf = true;
     }
@@ -174,18 +190,19 @@ void g_update() {
     }
     if (jump && down) {
         p.vel.y = p.jump_force * 2;
+        jump_buf = false;
+        jump_timer = 0.f;
     } else if ((p.col_norm.y < 0 && jump_buf && can_jump) ||
                (!down && djump_left > 0 && jump)) {
         p.vel.y = -p.jump_force;
         if (p.col_norm.y >= 0) {
             djump_left--;
         }
-    } else {
-        p.vel.y = p.vel.y + GRAVITY * GetFrameTime();
-    }
-    if (p.col_norm.x != 0 && jump_buf && can_jump) {
+    } else if (p.col_norm.x != 0 && jump_buf && can_jump) {
         p.vel.x = (p.jump_force * 0.5f) * p.col_norm.x;
         p.vel.y = -p.jump_force;
+    } else {
+        p.vel.y = p.vel.y + GRAVITY * GetFrameTime();
     }
     if (hor == 0 && p.col_norm.y != 0)
         p.vel.x = Vector2Lerp(p.vel, Vector2Zero(), steer * GetFrameTime()).x;
@@ -242,6 +259,7 @@ void g_update() {
             (v2){world_bounds.x + world_bounds.width - enemy.rad,
                  world_bounds.y + world_bounds.height - enemy.rad});
         enemy.pos = e_next_pos;
+        // enemy.speed = enemy.speed * (i32)((time / 10));
         *&e[i] = enemy;
         for (i32 j = 0; j < ENEMY_COUNT; j++) {
             if (&e[i] == &e[j])
@@ -251,26 +269,11 @@ void g_update() {
                 CheckCollisionCircles(e[i].pos, e[i].rad, e[j].pos, e[j].rad);
             if (col && dist < e[i].rad + e[j].rad + eps) {
                 v2 n = Vector2Normalize(Vector2Subtract(e[j].pos, e[i].pos));
-                n = (v2){
-                    n.x > 0   ? 1
-                    : n.x < 0 ? -1
-                              : 0,
-                    n.y > 0   ? 1
-                    : n.y < 0 ? -1
-                              : 0,
-                };
                 v2 n2 = Vector2Normalize(Vector2Subtract(e[i].pos, e[j].pos));
-                n2 = (v2){
-                    n2.x > 0   ? 1
-                    : n2.x < 0 ? -1
-                               : 0,
-                    n2.y > 0   ? 1
-                    : n2.y < 0 ? -1
-                               : 0,
-                };
-                // n = Vector2Scale(n, 1f);
-                e[i].vel = Vector2Multiply(e[i].vel, n);
-                e[j].vel = Vector2Multiply(e[j].vel, n2);
+                f32 e1len = Vector2Length(e[i].vel);
+                e[i].vel = Vector2Scale(n2, e1len);
+                f32 e2len = Vector2Length(e[j].vel);
+                e[j].vel = Vector2Scale(n, e2len);
             }
         }
         e_next_pos =

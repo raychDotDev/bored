@@ -1,33 +1,33 @@
 ifeq ($(OS),Windows_NT)
-    UNAME = Windows
+	UNAME = Windows
 else
-    UNAME := $(shell uname -s)
+	UNAME := $(shell uname -s)
 endif
 
-CC = clang
+CC = gcc
 
 CCFLAGS += -std=c2x
 CCFLAGS += -Wall
 # CCFLAGS += -Werror
 CCFLAGS += -g
-CCFLAGS += -O3
+LDFLAGS += -mwindows
+CCFLAGS += -static
+LDFLAGS += -static-libgcc
 CCFLAGS += -Iinclude
-
 # LDFLAGS += -lopenmp
 ifeq ($(UNAME),Windows)
-    CCFLAGS += -D_DEFAULT_SOURCE
-    LDFLAGS += -lraylib.dll
-    LDFLAGS += -lraylib
-    LDFLAGS += -lwinmm -lgdi32 -lopengl32
-    # LDFLAGS += -mwindows
-    CCFLAGS += -static
-    LDFLAGS += -static
-    EXE_SUFFIX := .exe
+	LDFLAGS += -static
+	LDFLAGS += -lraylib
+	# LDFLAGS += -l:libraylib.a
+	LDFLAGS += -lwinmm -lgdi32 -lopengl32
+	EXE_SUFFIX := .exe
 else
-    ifeq ($(UNAME),Linux)
-        LDFLAGS += -lraylib -lm -ldl
-    endif
+	ifeq ($(UNAME),Linux)
+	LDFLAGS += -lraylib -lm -ldl
 endif
+endif
+
+
 
 TARGET = Game$(EXE_SUFFIX)
 SRC_DIR = src/
@@ -38,7 +38,7 @@ ASSET_DIR = assets/
 SOURCES := $(wildcard $(SRC_DIR)*.c $(SRC_DIR)**/*.c $(SRC_DIR)**/**/*.c )
 
 ifeq ($(SOURCES),)
-    SOURCES := $(wildcard $(SRC_DIR)*.c)
+	SOURCES := $(wildcard $(SRC_DIR)*.c)
 endif
 
 OBJECTS := $(patsubst $(SRC_DIR)%.c,$(OBJ_DIR)%.o,$(SOURCES))
@@ -55,7 +55,7 @@ $(BIN_DIR):
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c | $(OBJ_DIR)
 	mkdir -p $(dir $@)
-	$(CC) $(CCFLAGS) -c $< -o $@
+	$(CC) -c $< -o $@ $(CCFLAGS)
 
 $(OBJ_DIR):
 	mkdir -p $@
