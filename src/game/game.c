@@ -38,8 +38,8 @@ void GameRun() {
         return;
     }
     while (self.running && !WindowShouldClose()) {
-        GameDraw();
         GameUpdate();
+        GameDraw();
     }
     GameDispose();
 }

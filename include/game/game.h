@@ -1,6 +1,6 @@
 #pragma once
 typedef struct _sc Screen;
-#define GAME_VERSION 0.1
+#define GAME_VERSION 0.2
 void GameInit();
 void GameRun();
 void GameSetScreen(Screen *screen);

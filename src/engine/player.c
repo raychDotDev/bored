@@ -32,7 +32,7 @@ Entity *PlayerNew(v2 pos, Color tint) {
     self->dashes = 3;
     self->dashes_left = 3;
     self->dashing = false;
-    self->dash_duration = 0.15f;
+    self->dash_duration = 0.20f;
     self->dash_timer = GetTime();
 	self->base.tint = tint;
     return (Entity *)self;
