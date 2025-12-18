@@ -13,7 +13,8 @@ typedef struct _e {
     v2 pos, vel, fri;
     f32 rad, friction, spd;
     Color tint;
-    bool collides_e;
+    bool collides_w_entity;
+	bool affected_by_gravity;
     EntityVsWorldCollisionType evwct;
     void (*on_update)(Entity *self, World *ctx);
     void (*on_collide_entity)(Entity *self, Entity *other);

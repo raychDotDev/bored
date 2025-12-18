@@ -1,5 +1,6 @@
 #include "game/screens/main_screen.h"
 #include "engine/entity.h"
+#include "engine/player.h"
 #include "engine/world.h"
 #include "fixed.h"
 #include "game/game.h"
@@ -19,17 +20,12 @@ void _msc_update_camera(MainScreen *self, v2 targetPos) {
     self->camera.target = targetPos;
     self->camera.offset = sshalf;
     self->camera.rotation = 0.f;
-    self->camera.zoom = fabsf(self->w->size.y / ss.y) * 10.f;
+    self->camera.zoom = fabsf(ss.y / self->w->size.y) * 0.5f;
 }
 void _msc_load(Screen *s) {
     MainScreen *self = (MainScreen *)s;
-    self->w = WorldCreate((v2){200, 100});
-    Entity *player = MemAlloc(sizeof(Entity));
-    *player = EntityNew();
-    player->pos = (v2){10, 10};
-    player->rad = 2.f;
-    player->tint = RED;
-    player->collides_e = false;
+    self->w = WorldCreate((v2){100, 50});
+    Entity *player = PlayerNew((v2){50, 50});
     // player->evect = EVECT_BOUNCE;
     // player->evwct = EVWCT_BOUNCE;
     Entity *someone = MemAlloc(sizeof(Entity));
@@ -37,14 +33,18 @@ void _msc_load(Screen *s) {
     someone->pos = (v2){30, 30};
     someone->rad = 2.f;
     someone->tint = GREEN;
+    someone->spd = 400.f;
     someone->evwct = EVWCT_BOUNCE;
+    someone->affected_by_gravity = false;
     Entity *somebody = MemAlloc(sizeof(Entity));
     *somebody = EntityNew();
     somebody->pos = (v2){50, 50};
     somebody->rad = 2.f;
     somebody->tint = BLUE;
+    somebody->spd = 400.f;
     // somebody->evect = EVECT_BOUNCE;
     somebody->evwct = EVWCT_BOUNCE;
+    somebody->affected_by_gravity = false;
     WorldAddEntity(self->w, player);
     WorldAddEntity(self->w, someone);
     WorldAddEntity(self->w, somebody);
@@ -74,28 +74,17 @@ void _msc_draw(Screen *s) {
              20, WHITE);
     DrawFPS(10, 50);
 }
-i32 fps = 240;
 void _msc_update(Screen *s) {
     MainScreen *self = (MainScreen *)s;
     Entity *p = self->w->entities[0];
     _msc_update_camera(self, Vector2Scale(self->w->size, 0.5f));
-    if (p) {
-        v2 dir = Vector2Normalize((v2){
-            IsKeyDown(KEY_D) - IsKeyDown(KEY_A),
-            IsKeyDown(KEY_S) - IsKeyDown(KEY_W),
-        });
-        v2 force = Vector2Scale(dir, p->spd);
-        EntityApplyForce(p, force);
+    for (i32 i = 0; i < self->w->entities_count; i++) {
+        Entity *e = self->w->entities[i];
+        if (!e || e == p)
+            continue;
+        v2 dir = Vector2Normalize(Vector2Subtract(p->pos, e->pos));
+        EntityApplyForce(e, Vector2Scale(dir, e->spd));
     }
-    if (IsKeyPressed(KEY_SPACE)) {
-        SetTargetFPS((fps = fps == 240 ? 60 : 240));
-    }
-	for (i32 i = 0; i < self->w->entities_count; i++) {
-		Entity* e = self->w->entities[i];
-		if (!e || e == p) continue;
-		v2 dir = Vector2Normalize(Vector2Subtract(p->pos,e->pos));
-		EntityApplyForce(e, Vector2Scale(dir, e->spd));
-	}
     WorldUpdate(self->w);
 }
 Screen *MainScreenNew() {

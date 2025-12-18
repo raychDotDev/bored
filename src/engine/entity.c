@@ -9,13 +9,14 @@ Entity EntityNew() {
         .pos = {},
         .vel = {},
         .fri = {},
-        .spd = 400.f,
+        .spd = 300.f,
         .rad = 1.f,
         .friction = 2.f,
-        .tint = WHITE,
+        .tint = BLACK,
         .on_collide_entity = nullptr,
         .on_collide_wall = nullptr,
-        .collides_e = true,
+        .affected_by_gravity = true,
+        .collides_w_entity = true,
         .evwct = EVWCT_SLIDE,
     };
     return self;
@@ -47,7 +48,7 @@ void EntityUpdate(Entity *self, World *ctx) {
         f32 overlap = fabsf(dist - rad_sum);
         overlap *= 0.5f;
         if (dist < rad_sum) {
-            if (other->collides_e && self->collides_e) {
+            if (other->collides_w_entity && self->collides_w_entity) {
                 v2 normal_self =
                     Vector2Normalize(Vector2Subtract(self->pos, other->pos));
                 v2 normal_other = Vector2Negate(normal_self);
@@ -85,7 +86,8 @@ void EntityUpdate(Entity *self, World *ctx) {
         EntityCollideWall(self, world_col_normal);
     }
     self->fri = Vector2Negate(Vector2Scale(self->vel, self->friction));
-    EntityApplyForce(self, ctx->gravity);
+    if (self->affected_by_gravity)
+        EntityApplyForce(self, ctx->gravity);
 }
 void EntityCollideEntity(Entity *self, Entity *other) {
     if (!self || !self->on_collide_entity || !other)
