@@ -11,6 +11,7 @@ World *WorldCreate(v2 size) {
     self->entities_count = 0;
     self->entities = MemAlloc(sizeof(Entity *) * self->entities_capacity);
     self->size = Vector2ClampValue(size, 1, 1e30f);
+    self->gravity = (v2){0, 200};
     self->inner_color = WHITE;
     self->outer_color = BLACK;
     return self;

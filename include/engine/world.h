@@ -5,7 +5,7 @@
 #include <raylib.h>
 
 typedef struct _w {
-    v2 size;
+    v2 size, gravity;
     Entity **entities;
     u32 entities_count;
     u32 entities_capacity;
