@@ -1,37 +1,18 @@
 #include "engine/player.h"
 #include "engine/entity.h"
+#include <math.h>
 #include <raymath.h>
-
-typedef struct _ep {
-    Entity base;
-    bool alive;
-    bool was_onground;
-    bool onground;
-    bool jump_buf;
-    i32 jumps_left;
-    i32 jumps;
-    f64 jump_timer;
-    f64 jump_time;
-    f32 jump_force;
-    f32 stomp_force;
-    f32 dash_force_hor;
-    f32 dash_force_ver;
-    i32 dashes_left;
-    i32 dashes;
-    bool dashing;
-    f32 dash_timer;
-    f32 dash_duration;
-} Player;
+#include <stdio.h>
 
 void _ep_on_collide_entity(Entity *s, Entity *other);
 void _ep_on_update(Entity *s, World *ctx);
 void _ep_on_collide_wall(Entity *s, v2 normal);
-Entity *PlayerNew(v2 pos) {
+Entity *PlayerNew(v2 pos, Color tint) {
     Player *self = MemAlloc(sizeof(Player));
     self->base = EntityNew();
     self->base.pos = pos;
     self->base.rad = 2.f;
-    self->base.spd = 100.f;
+    self->base.spd = 80.f;
     self->base.friction = 0.f;
     self->base.affected_by_gravity = true;
     self->base.collides_w_entity = false;
@@ -45,14 +26,15 @@ Entity *PlayerNew(v2 pos) {
     self->onground = false;
     self->jumps = 1;
     self->jumps_left = 1;
-    self->jump_force = -125.f;
-    self->dash_force_hor = 200.f;
-    self->dash_force_ver = 100.f;
+    self->jump_force = -105.f;
+    self->stomp_force = 170.f;
+    self->dash_force = 100.f;
     self->dashes = 3;
     self->dashes_left = 3;
     self->dashing = false;
     self->dash_duration = 0.15f;
     self->dash_timer = GetTime();
+	self->base.tint = tint;
     return (Entity *)self;
 }
 void _ep_on_collide_wall(Entity *s, v2 normal) {
@@ -96,7 +78,7 @@ void _ep_on_update(Entity *s, World *ctx) {
     f32 hor = IsKeyDown(KEY_D) - IsKeyDown(KEY_A);
     if (IsKeyPressed(KEY_LEFT_SHIFT) && !self->dashing &&
         self->dashes_left > 0 && hor != 0) {
-        self->base.vel.x = hor * self->dash_force_hor;
+        self->base.vel.x = hor * self->dash_force;
         self->dashing = true;
         self->dash_timer = GetTime();
         self->dashes_left--;
@@ -104,7 +86,12 @@ void _ep_on_update(Entity *s, World *ctx) {
         self->base.vel.x = hor * self->base.spd;
     } else if (self->dashing) {
         self->base.affected_by_gravity = false;
-		self->base.vel.y = 0;
+        self->base.vel.y = 0;
+    }
+    if (IsKeyPressed(KEY_S)) {
+        _ep_reset_dash(self);
+        self->base.vel.y = self->stomp_force;
+		self->base.vel.x = 0.f;
     }
     if (GetTime() - self->dash_timer > self->dash_duration) {
         _ep_reset_dash(self);

@@ -17,32 +17,32 @@ typedef struct _msc {
 void _msc_update_camera(MainScreen *self, v2 targetPos) {
     v2 ss = {GetScreenWidth(), GetScreenHeight()};
     v2 sshalf = {ss.x / 2, ss.y / 2};
-    self->camera.target = targetPos;
+    self->camera.target =
+        Vector2Lerp(self->camera.target, targetPos, 9.f * GetFrameTime());
     self->camera.offset = sshalf;
     self->camera.rotation = 0.f;
     self->camera.zoom = fabsf(ss.y / self->w->size.y) * 0.5f;
 }
 void _msc_load(Screen *s) {
     MainScreen *self = (MainScreen *)s;
-    self->w = WorldCreate((v2){100, 50});
-    Entity *player = PlayerNew((v2){50, 50});
-    // player->evect = EVECT_BOUNCE;
-    // player->evwct = EVWCT_BOUNCE;
+    self->w = WorldCreate((v2){150, 50});
+    Entity *player =
+        PlayerNew((v2){self->w->size.x * 0.5f, self->w->size.y * 0.5f},
+                  self->w->outer_color);
     Entity *someone = MemAlloc(sizeof(Entity));
     *someone = EntityNew();
-    someone->pos = (v2){30, 30};
-    someone->rad = 2.f;
-    someone->tint = GREEN;
-    someone->spd = 400.f;
+    someone->pos = (v2){self->w->size.x * 0.1f, self->w->size.y * 0.1f};
+    someone->rad = 3.f;
+    someone->tint = self->w->outer_color;
+    someone->spd = 430.f;
     someone->evwct = EVWCT_BOUNCE;
     someone->affected_by_gravity = false;
     Entity *somebody = MemAlloc(sizeof(Entity));
     *somebody = EntityNew();
-    somebody->pos = (v2){50, 50};
-    somebody->rad = 2.f;
-    somebody->tint = BLUE;
-    somebody->spd = 400.f;
-    // somebody->evect = EVECT_BOUNCE;
+    somebody->pos = (v2){self->w->size.x * 0.9f, self->w->size.y * 0.1f};
+    somebody->rad = 3.f;
+    somebody->tint = self->w->outer_color;
+    somebody->spd = 390.f;
     somebody->evwct = EVWCT_BOUNCE;
     somebody->affected_by_gravity = false;
     WorldAddEntity(self->w, player);
@@ -66,26 +66,25 @@ void _msc_draw(Screen *s) {
         DrawCircleV(e->pos, e->rad, e->tint);
     }
     EndMode2D();
-    Entity *player = self->w->entities[0];
-    DrawText(TextFormat("VELSELF: %f %f", player->vel.x, player->vel.y), 10, 10,
-             20, WHITE);
-    Entity *other = self->w->entities[1];
-    DrawText(TextFormat("VELOTHER: %f %f", other->vel.x, other->vel.y), 10, 30,
-             20, WHITE);
-    DrawFPS(10, 50);
 }
 void _msc_update(Screen *s) {
     MainScreen *self = (MainScreen *)s;
     Entity *p = self->w->entities[0];
-    _msc_update_camera(self, Vector2Scale(self->w->size, 0.5f));
-    for (i32 i = 0; i < self->w->entities_count; i++) {
-        Entity *e = self->w->entities[i];
-        if (!e || e == p)
-            continue;
-        v2 dir = Vector2Normalize(Vector2Subtract(p->pos, e->pos));
-        EntityApplyForce(e, Vector2Scale(dir, e->spd));
-    }
-    WorldUpdate(self->w);
+    _msc_update_camera(self, p->pos);
+    if (((Player *)p)->alive) {
+        for (i32 i = 0; i < self->w->entities_count; i++) {
+            Entity *e = self->w->entities[i];
+            if (!e || e == p)
+                continue;
+            v2 dir = Vector2Normalize(Vector2Subtract(p->pos, e->pos));
+            EntityApplyForce(e, Vector2Scale(dir, e->spd));
+        }
+        WorldUpdate(self->w);
+    } else {
+		if (IsKeyPressed(KEY_SPACE)) {
+			GameSetScreen(MainScreenNew());
+		}
+	}
 }
 Screen *MainScreenNew() {
     MainScreen *self = MemAlloc(sizeof(MainScreen));

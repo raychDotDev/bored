@@ -48,6 +48,7 @@ void EntityUpdate(Entity *self, World *ctx) {
         f32 overlap = fabsf(dist - rad_sum);
         overlap *= 0.5f;
         if (dist < rad_sum) {
+            EntityCollideEntity(self, other);
             if (other->collides_w_entity && self->collides_w_entity) {
                 v2 normal_self =
                     Vector2Normalize(Vector2Subtract(self->pos, other->pos));
@@ -61,7 +62,6 @@ void EntityUpdate(Entity *self, World *ctx) {
                 self->pos =
                     Vector2Add(self->pos, Vector2Scale(normal_self, overlap));
             }
-            EntityCollideEntity(self, other);
         }
     }
     v2 world_col_normal = {};
