@@ -19,3 +19,5 @@ void WorldDestroy(World *self);
 void WorldAddEntity(World *self, Entity *value);
 void WorldRemoveEntity(World *self, u32 at);
 Entity *WorldGetEntity(World *self, u32 index);
+
+void WorldUpdate(World*self);

@@ -14,7 +14,7 @@ GameState self;
 void GameInit() {
     self = (GameState){.screen = nullptr, .running = true};
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    SetConfigFlags(FLAG_VSYNC_HINT);
+    // SetConfigFlags(FLAG_VSYNC_HINT);
     InitWindow(INIT_WINDOW_SIZE.x, INIT_WINDOW_SIZE.y, "Game");
 }
 void GameDispose();

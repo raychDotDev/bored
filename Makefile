@@ -8,17 +8,15 @@ CC = gcc
 
 CCFLAGS += -std=c2x
 CCFLAGS += -Wall
-# CCFLAGS += -Werror
 CCFLAGS += -g
 # LDFLAGS += -mwindows
 CCFLAGS += -static
 LDFLAGS += -static-libgcc
 CCFLAGS += -Iinclude
-# LDFLAGS += -lopenmp
+
 ifeq ($(UNAME),Windows)
 	LDFLAGS += -static
 	LDFLAGS += -lraylib
-	# LDFLAGS += -l:libraylib.a
 	LDFLAGS += -lwinmm -lgdi32 -lopengl32
 	EXE_SUFFIX := .exe
 else

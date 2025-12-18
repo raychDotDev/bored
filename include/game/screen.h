@@ -2,10 +2,10 @@
 
 typedef struct _sc Screen;
 typedef struct _sc {
-    void (*load)(Screen *self);
-    void (*unload)(Screen *self);
-    void (*draw)(Screen *self);
-    void (*update)(Screen *self);
+    void (*on_load)(Screen *self);
+    void (*on_unload)(Screen *self);
+    void (*on_draw)(Screen *self);
+    void (*on_update)(Screen *self);
 } Screen;
 
 void ScreenLoad(Screen*self);

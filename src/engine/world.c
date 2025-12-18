@@ -1,5 +1,6 @@
 #include "engine/world.h"
 #include "engine/entity.h"
+#include "fixed.h"
 #include <raylib.h>
 #include <raymath.h>
 #include <stdlib.h>
@@ -58,4 +59,12 @@ Entity *WorldGetEntity(World *self, u32 index) {
     if (!self || index >= self->entities_count)
         return nullptr;
     return self->entities[index];
+}
+
+void WorldUpdate(World *self) {
+    if (!self)
+        return;
+    for (i32 i = 0; i < self->entities_count; i++) {
+        EntityUpdate(self->entities[i], self);
+    }
 }

@@ -3,36 +3,36 @@
 
 Screen ScreenNew() {
     Screen res = {
-        .load = nullptr,
-        .unload = nullptr,
-        .draw = nullptr,
-        .update = nullptr,
+        .on_load = nullptr,
+        .on_unload = nullptr,
+        .on_draw = nullptr,
+        .on_update = nullptr,
     };
     return res;
 }
 void ScreenLoad(Screen *self) {
-    if (!self || !self->load) {
+    if (!self || !self->on_load) {
         return;
     }
-    self->load(self);
+    self->on_load(self);
 }
 void ScreenUnload(Screen *self) {
-    if (!self || !self->unload) {
+    if (!self || !self->on_unload) {
         return;
     }
-    self->unload(self);
+    self->on_unload(self);
 }
 void ScreenDraw(Screen *self) {
-    if (!self || !self->draw) {
+    if (!self || !self->on_draw) {
         return;
     }
-    self->draw(self);
+    self->on_draw(self);
 }
 void ScreenUpdate(Screen *self) {
-    if (!self || !self->update) {
+    if (!self || !self->on_update) {
         return;
     }
-    self->update(self);
+    self->on_update(self);
 }
 
 void ScreenDispose(Screen *self) {
