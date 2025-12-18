@@ -2,4 +2,4 @@
 
 #include "game/screen.h"
 
-Screen* MainScreenNew();
+Screen* MainScreenNew(bool started);

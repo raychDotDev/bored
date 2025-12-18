@@ -7,7 +7,7 @@
 
 i32 main() {
     GameInit();
-    GameSetScreen(MainScreenNew());
+    GameSetScreen(MainScreenNew(false));
     GameRun();
     return 0;
 }

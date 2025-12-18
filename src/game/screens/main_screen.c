@@ -12,6 +12,7 @@ typedef struct _msc {
     Screen base;
     Camera2D camera;
     World *w;
+    bool started;
 } MainScreen;
 
 void _msc_update_camera(MainScreen *self, v2 targetPos) {
@@ -34,7 +35,7 @@ void _msc_load(Screen *s) {
     someone->pos = (v2){self->w->size.x * 0.1f, self->w->size.y * 0.1f};
     someone->rad = 3.f;
     someone->tint = self->w->outer_color;
-    someone->spd = 430.f;
+    someone->spd = 400.f;
     someone->evwct = EVWCT_BOUNCE;
     someone->affected_by_gravity = false;
     Entity *somebody = MemAlloc(sizeof(Entity));
@@ -42,13 +43,13 @@ void _msc_load(Screen *s) {
     somebody->pos = (v2){self->w->size.x * 0.9f, self->w->size.y * 0.1f};
     somebody->rad = 3.f;
     somebody->tint = self->w->outer_color;
-    somebody->spd = 390.f;
+    somebody->spd = 360.f;
     somebody->evwct = EVWCT_BOUNCE;
     somebody->affected_by_gravity = false;
     WorldAddEntity(self->w, player);
     WorldAddEntity(self->w, someone);
     WorldAddEntity(self->w, somebody);
-    self->camera = (Camera2D){};
+    self->camera = (Camera2D){.target = player->pos};
 }
 void _msc_unload(Screen *s) {
     MainScreen *self = (MainScreen *)s;
@@ -71,7 +72,11 @@ void _msc_update(Screen *s) {
     MainScreen *self = (MainScreen *)s;
     Entity *p = self->w->entities[0];
     _msc_update_camera(self, p->pos);
-    if (((Player *)p)->alive) {
+    if (!((Player *)p)->alive) {
+        if (IsKeyPressed(KEY_SPACE)) {
+            GameSetScreen(MainScreenNew(true));
+        }
+    } else if (((Player *)p)->alive && self->started) {
         for (i32 i = 0; i < self->w->entities_count; i++) {
             Entity *e = self->w->entities[i];
             if (!e || e == p)
@@ -81,13 +86,14 @@ void _msc_update(Screen *s) {
         }
         WorldUpdate(self->w);
     } else {
-		if (IsKeyPressed(KEY_SPACE)) {
-			GameSetScreen(MainScreenNew());
-		}
+        if (IsKeyPressed(KEY_SPACE)) {
+			self->started = true;
+        }
 	}
 }
-Screen *MainScreenNew() {
+Screen *MainScreenNew(bool started) {
     MainScreen *self = MemAlloc(sizeof(MainScreen));
+    self->started = started;
     self->base = ScreenNew();
     self->base.on_load = _msc_load;
     self->base.on_unload = _msc_unload;

@@ -16,6 +16,7 @@ void GameInit() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     SetConfigFlags(FLAG_VSYNC_HINT);
     InitWindow(INIT_WINDOW_SIZE.x, INIT_WINDOW_SIZE.y, "Game");
+    SetWindowTitle(TextFormat("bored v.%.1f", GAME_VERSION));
 }
 void GameDispose();
 void GameDraw() {
