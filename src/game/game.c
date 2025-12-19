@@ -14,9 +14,8 @@ GameState self;
 void GameInit() {
     self = (GameState){.screen = nullptr, .running = true};
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    // SetConfigFlags(FLAG_VSYNC_HINT);
     InitWindow(INIT_WINDOW_SIZE.x, INIT_WINDOW_SIZE.y, "Game");
-	SetTargetFPS(240);
+    SetTargetFPS(240);
     SetWindowTitle(TextFormat("bored v.%.1f", GAME_VERSION));
 }
 void GameDispose();
@@ -26,7 +25,12 @@ void GameDraw() {
     ScreenDraw(self.screen);
     EndDrawing();
 }
-void GameUpdate() { ScreenUpdate(self.screen); }
+void GameUpdate() {
+    if (IsKeyPressed(KEY_F5)) {
+        ToggleBorderlessWindowed();
+    }
+    ScreenUpdate(self.screen);
+}
 void GameSetScreen(Screen *screen) {
     ScreenUnload(self.screen);
     if (self.screen)

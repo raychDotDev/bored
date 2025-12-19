@@ -10,6 +10,7 @@ void _ep_on_collide_wall(Entity *s, v2 normal);
 Entity *PlayerNew(v2 pos, Color tint) {
     Player *self = MemAlloc(sizeof(Player));
     self->base = EntityNew();
+	self->base.flag = 0;
     self->base.pos = pos;
     self->base.rad = 2.f;
     self->base.spd = 80.f;
@@ -28,11 +29,11 @@ Entity *PlayerNew(v2 pos, Color tint) {
     self->jumps_left = 1;
     self->jump_force = -105.f;
     self->stomp_force = 170.f;
-    self->dash_force = 100.f;
+    self->dash_force = 200.f;
     self->dashes = 3;
     self->dashes_left = 3;
     self->dashing = false;
-    self->dash_duration = 0.20f;
+    self->dash_duration = 0.10f;
     self->dash_timer = GetTime();
 	self->base.tint = tint;
     return (Entity *)self;

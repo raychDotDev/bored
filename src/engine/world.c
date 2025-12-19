@@ -10,10 +10,11 @@ World *WorldCreate(v2 size) {
     self->entities_capacity = 16;
     self->entities_count = 0;
     self->entities = MemAlloc(sizeof(Entity *) * self->entities_capacity);
-    self->size = Vector2ClampValue(size, 1, 1e30f);
-    self->gravity = (v2){0, 500};
+    self->size = Vector2ClampValue(size, 20, 1e30f);
+    self->gravity = (v2){0, 550};
     self->inner_color = WHITE;
     self->outer_color = BLACK;
+    self->contrast_color = RED;
     return self;
 }
 void WorldDestroy(World *self) {

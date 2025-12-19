@@ -1,4 +1,5 @@
 #include "game/screens/main_screen.h"
+#include "engine/enemy.h"
 #include "engine/entity.h"
 #include "engine/player.h"
 #include "engine/world.h"
@@ -14,6 +15,7 @@ typedef struct _msc {
     World *w;
     bool started;
     f32 seconds;
+    Color palletes[3][3];
 } MainScreen;
 
 void _msc_update_camera(MainScreen *self, v2 targetPos) {
@@ -25,31 +27,36 @@ void _msc_update_camera(MainScreen *self, v2 targetPos) {
     self->camera.rotation = 0.f;
     self->camera.zoom = fabsf(ss.y / self->w->size.y) * 0.5f;
 }
+void _msc_set_pallette(MainScreen *self, u32 index) {
+    self->w->outer_color = self->palletes[index][0];
+    self->w->inner_color = self->palletes[index][1];
+    self->w->contrast_color = self->palletes[index][2];
+}
 void _msc_load(Screen *s) {
     MainScreen *self = (MainScreen *)s;
+    self->palletes[0][0] = BLACK;
+    self->palletes[0][1] = (Color){227, 212, 212, 255};
+    self->palletes[0][2] = (Color){133, 0, 0, 255};
+    self->palletes[1][0] = (Color){197, 200, 181, 255};
+    self->palletes[1][1] = (Color){253, 255, 254, 255};
+    self->palletes[1][2] = (Color){94, 0, 0, 255};
+    self->palletes[2][0] = (Color){0, 10, 0, 255};
+    self->palletes[2][1] = (Color){238, 206, 0, 255};
+    self->palletes[2][2] = (Color){224, 118, 0, 255};
     self->w = WorldCreate((v2){150, 50});
+    _msc_set_pallette(self, 0);
     Entity *player =
         PlayerNew((v2){self->w->size.x * 0.5f, self->w->size.y * 0.5f},
                   self->w->outer_color);
-    Entity *someone = MemAlloc(sizeof(Entity));
-    *someone = EntityNew();
-    someone->pos = (v2){self->w->size.x * 0.1f, self->w->size.y * 0.1f};
-    someone->rad = 3.f;
-    someone->tint = self->w->outer_color;
-    someone->spd = 400.f;
-    someone->evwct = EVWCT_BOUNCE;
-    someone->affected_by_gravity = false;
-    Entity *somebody = MemAlloc(sizeof(Entity));
-    *somebody = EntityNew();
-    somebody->pos = (v2){self->w->size.x * 0.9f, self->w->size.y * 0.1f};
-    somebody->rad = 3.f;
-    somebody->tint = self->w->outer_color;
-    somebody->spd = 360.f;
-    somebody->evwct = EVWCT_BOUNCE;
-    somebody->affected_by_gravity = false;
+    Entity *a = EnemyNew((v2){self->w->size.x * 0.1f, self->w->size.y * 0.1f},
+                         self->w->contrast_color, self->w->outer_color);
+    Entity *b = EnemyNew((v2){self->w->size.x * 0.9f, self->w->size.y * 0.1f},
+                         self->w->contrast_color, self->w->outer_color);
+    Enemy *be = ((Enemy *)b);
+    be->dash_cd_timer = -be->dash_cd * .5f;
     WorldAddEntity(self->w, player);
-    WorldAddEntity(self->w, someone);
-    WorldAddEntity(self->w, somebody);
+    WorldAddEntity(self->w, a);
+    WorldAddEntity(self->w, b);
     self->camera = (Camera2D){.target = player->pos};
 }
 void _msc_unload(Screen *s) {
@@ -67,7 +74,7 @@ void _msc_draw(Screen *s) {
     f32 wh = GetScreenHeight();
     f32 ts = 20;
     Color outer = self->w->outer_color;
-    outer.a = 150;
+    outer.a = 190;
     const char *secs = "%.1f";
     secs = TextFormat(secs, self->seconds);
     f32 ss = MeasureText(secs, ts);
@@ -81,14 +88,14 @@ void _msc_draw(Screen *s) {
     if (!p->alive || !self->started) {
         DrawRectangleV((v2){}, (v2){GetScreenWidth(), GetScreenHeight()},
                        outer);
-        f32 ts = 20;
+        f32 ts = 8 * self->camera.zoom;
         const char *text = "PRESS [SPACE] TO (RE)START";
         f32 text_s = MeasureText(text, ts);
         DrawText(text, ww / 2.f - text_s / 2, wh / 2, ts, self->w->inner_color);
         if (!p->alive) {
             const char *secs = "YOUR SCORE: %.1f SECONDS";
             secs = TextFormat(secs, self->seconds);
-            f32 secs_s = MeasureText(text, 20);
+            f32 secs_s = MeasureText(text, ts);
             DrawText(secs, ww / 2.f - secs_s / 2, wh / 2 - ts, ts,
                      self->w->inner_color);
         }

@@ -10,6 +10,7 @@ typedef enum {
 typedef struct _e Entity;
 typedef struct _w World;
 typedef struct _e {
+	u64 flag;
     v2 pos, vel, fri;
     f32 rad, friction, spd;
     Color tint;

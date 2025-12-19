@@ -11,6 +11,7 @@ typedef struct _w {
     u32 entities_capacity;
     Color inner_color;
     Color outer_color;
+	Color contrast_color;
 } World;
 
 World *WorldCreate(v2 size);
