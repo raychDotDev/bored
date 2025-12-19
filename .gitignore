@@ -2,5 +2,6 @@ bin/
 obj/
 .cache/
 compile_commands.json
+/*.zip
 /*.png
 /*.jpg

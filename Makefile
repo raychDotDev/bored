@@ -9,7 +9,7 @@ CC = gcc
 CCFLAGS += -std=c2x
 CCFLAGS += -Wall
 CCFLAGS += -g
-# LDFLAGS += -mwindows
+LDFLAGS += -mwindows
 CCFLAGS += -static
 LDFLAGS += -static-libgcc
 CCFLAGS += -Iinclude
