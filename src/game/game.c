@@ -1,6 +1,8 @@
 #include "game/game.h"
+#include "engine/resman.h"
 #include "fixed.h"
 #include "game/screen.h"
+#include <raylib.h>
 
 const v2i INIT_WINDOW_SIZE = (v2i){720, 480};
 
@@ -14,9 +16,12 @@ GameState self;
 void GameInit() {
     self = (GameState){.screen = nullptr, .running = true};
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(INIT_WINDOW_SIZE.x, INIT_WINDOW_SIZE.y, "Game");
+    InitWindow(INIT_WINDOW_SIZE.x, INIT_WINDOW_SIZE.y, "");
+    InitAudioDevice();
+	// SetMasterVolume(0.3f);
     SetTargetFPS(240);
     SetWindowTitle(TextFormat("bored v.%.1f", GAME_VERSION));
+    ResManInit();
 }
 void GameDispose();
 void GameDraw() {
@@ -52,5 +57,7 @@ void GameStop();
 
 void GameDispose() {
     GameSetScreen(nullptr);
+    ResManDispose();
+    CloseAudioDevice();
     CloseWindow();
 }

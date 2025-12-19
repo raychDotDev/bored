@@ -19,15 +19,11 @@ ifeq ($(UNAME),Windows)
 	LDFLAGS += -lraylib
 	LDFLAGS += -lwinmm -lgdi32 -lopengl32
 	EXE_SUFFIX := .exe
-else
-	ifeq ($(UNAME),Linux)
+else ifeq ($(UNAME),Linux)
 	LDFLAGS += -lraylib -lm -ldl
 endif
-endif
 
-
-
-TARGET = Game$(EXE_SUFFIX)
+TARGET = bored$(EXE_SUFFIX)
 SRC_DIR = src/
 BIN_DIR = bin/
 OBJ_DIR = obj/
@@ -44,6 +40,7 @@ OBJECTS := $(patsubst $(SRC_DIR)%.c,$(OBJ_DIR)%.o,$(SOURCES))
 .PHONY: all clean run rebuild
 
 all: $(BIN_DIR)$(TARGET)
+	cp -r $(ASSET_DIR) $(BIN_DIR)$(ASSET_DIR)
 
 $(BIN_DIR)$(TARGET): $(OBJECTS) | $(BIN_DIR)
 	$(CC) $^ -o $@ $(LDFLAGS)

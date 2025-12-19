@@ -1,5 +1,6 @@
 #include "engine/enemy.h"
 #include "engine/entity.h"
+#include "engine/resman.h"
 #include "engine/world.h"
 #include "fixed.h"
 #include <raymath.h>
@@ -57,6 +58,9 @@ void _ee_update(Entity *s, World *ctx) {
             _ee_reset_dash(self);
             self->dashing = true;
             self->base.vel = Vector2Scale(dir_to_target, self->dash_force);
+            Sound s;
+            ResManGetSound("enemy_dash", &s);
+            PlaySound(s);
         } else {
             self->dash_cd_timer += GetFrameTime();
             EntityApplyForce(
@@ -76,10 +80,16 @@ void _ee_update(Entity *s, World *ctx) {
 void _ee_collide_e(Entity *s, Entity *other) {
     Enemy *self = (Enemy *)s;
     self->dashing = false;
+    Sound sound;
+    ResManGetSound("entity_collide", &sound);
+    PlaySound(sound);
     // _ee_reset_dash(self);
 }
 void _ee_collide_w(Entity *s, v2 normal) {
     Enemy *self = (Enemy *)s;
     self->dashing = false;
+    Sound sound;
+    ResManGetSound("entity_collide", &sound);
+    PlaySound(sound);
     // _ee_reset_dash(self);
 }

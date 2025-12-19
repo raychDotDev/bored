@@ -49,6 +49,7 @@ void EntityUpdate(Entity *self, World *ctx) {
         overlap *= 0.5f;
         if (dist < rad_sum) {
             EntityCollideEntity(self, other);
+            EntityCollideEntity(other, self);
             if (other->collides_w_entity && self->collides_w_entity) {
                 v2 normal_self =
                     Vector2Normalize(Vector2Subtract(self->pos, other->pos));

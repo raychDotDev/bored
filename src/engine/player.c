@@ -1,6 +1,8 @@
 #include "engine/player.h"
 #include "engine/entity.h"
+#include "engine/resman.h"
 #include <math.h>
+#include <raylib.h>
 #include <raymath.h>
 #include <stdio.h>
 
@@ -10,7 +12,7 @@ void _ep_on_collide_wall(Entity *s, v2 normal);
 Entity *PlayerNew(v2 pos, Color tint) {
     Player *self = MemAlloc(sizeof(Player));
     self->base = EntityNew();
-	self->base.flag = 0;
+    self->base.flag = 0;
     self->base.pos = pos;
     self->base.rad = 2.f;
     self->base.spd = 80.f;
@@ -35,7 +37,7 @@ Entity *PlayerNew(v2 pos, Color tint) {
     self->dashing = false;
     self->dash_duration = 0.10f;
     self->dash_timer = GetTime();
-	self->base.tint = tint;
+    self->base.tint = tint;
     return (Entity *)self;
 }
 void _ep_on_collide_wall(Entity *s, v2 normal) {
@@ -73,6 +75,9 @@ void _ep_on_update(Entity *s, World *ctx) {
         if (self->dashing) {
             _ep_reset_dash(self);
         }
+        Sound s;
+        ResManGetSound("player_jump", &s);
+        PlaySound(s);
     } else if (time_diff > self->jump_time) {
         self->jump_buf = false;
     }
@@ -83,6 +88,9 @@ void _ep_on_update(Entity *s, World *ctx) {
         self->dashing = true;
         self->dash_timer = GetTime();
         self->dashes_left--;
+        Sound s;
+        ResManGetSound("player_dash", &s);
+        PlaySound(s);
     } else if (!self->dashing) {
         self->base.vel.x = hor * self->base.spd;
     } else if (self->dashing) {
@@ -92,7 +100,10 @@ void _ep_on_update(Entity *s, World *ctx) {
     if (IsKeyPressed(KEY_S)) {
         _ep_reset_dash(self);
         self->base.vel.y = self->stomp_force;
-		self->base.vel.x = 0.f;
+        self->base.vel.x = 0.f;
+        Sound s;
+        ResManGetSound("player_stomp", &s);
+        PlaySound(s);
     }
     if (GetTime() - self->dash_timer > self->dash_duration) {
         _ep_reset_dash(self);
