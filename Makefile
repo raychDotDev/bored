@@ -40,7 +40,7 @@ OBJECTS := $(patsubst $(SRC_DIR)%.c,$(OBJ_DIR)%.o,$(SOURCES))
 .PHONY: all clean run rebuild
 
 all: $(BIN_DIR)$(TARGET)
-	cp -r $(ASSET_DIR) $(BIN_DIR)$(ASSET_DIR)
+	cp -r $(ASSET_DIR) $(BIN_DIR)
 
 $(BIN_DIR)$(TARGET): $(OBJECTS) | $(BIN_DIR)
 	$(CC) $^ -o $@ $(LDFLAGS)

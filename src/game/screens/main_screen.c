@@ -2,6 +2,7 @@
 #include "engine/enemy.h"
 #include "engine/entity.h"
 #include "engine/player.h"
+#include "engine/resman.h"
 #include "engine/world.h"
 #include "fixed.h"
 #include "game/game.h"
@@ -104,12 +105,21 @@ void _msc_draw(Screen *s) {
 void _msc_update(Screen *s) {
     MainScreen *self = (MainScreen *)s;
     Entity *p = self->w->entities[0];
+    Sound sound;
+    ResManGetSound("music", &sound);
+    SetSoundVolume(sound, 0.3f);
     _msc_update_camera(self, p->pos);
     if (!((Player *)p)->alive) {
+        if (IsSoundPlaying(sound)) {
+            StopSound(sound);
+        }
         if (IsKeyPressed(KEY_SPACE)) {
             GameSetScreen(MainScreenNew(true));
         }
     } else if (((Player *)p)->alive && self->started) {
+        if (!IsSoundPlaying(sound)) {
+            PlaySound(sound);
+        }
         for (i32 i = 0; i < self->w->entities_count; i++) {
             Entity *e = self->w->entities[i];
             if (!e || e == p)
@@ -121,6 +131,7 @@ void _msc_update(Screen *s) {
     } else {
         if (IsKeyPressed(KEY_SPACE)) {
             self->started = true;
+            PlaySound(sound);
         }
     }
     if (((Player *)p)->alive && self->started) {
