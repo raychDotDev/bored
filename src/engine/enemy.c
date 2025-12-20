@@ -24,12 +24,12 @@ Entity *EnemyNew(v2 pos, Color tint, Color tint2) {
     self->base.on_collide_entity = _ee_collide_e;
     self->base.on_collide_wall = _ee_collide_w;
     self->dashing = false;
-    self->dash_force = 250.f;
+    self->dash_force = 190.f;
     self->dash_timer = 0.f;
     self->dash_time = 0.1f;
     self->dash_cd = 3.f;
     self->dash_cd_timer = 0.f;
-    self->dist_to_dash = 20.f;
+    self->dist_to_dash = 30.f;
     self->target = nullptr;
     return (Entity *)self;
 }

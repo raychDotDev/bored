@@ -29,9 +29,9 @@ Entity *PlayerNew(v2 pos, Color tint) {
     self->onground = false;
     self->jumps = 1;
     self->jumps_left = 1;
-    self->jump_force = -105.f;
+    self->jump_force = -125.f;
     self->stomp_force = 170.f;
-    self->dash_force = 200.f;
+    self->dash_force = 150.f;
     self->dashes = 3;
     self->dashes_left = 3;
     self->dashing = false;
