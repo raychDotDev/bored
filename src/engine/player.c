@@ -1,4 +1,5 @@
 #include "engine/player.h"
+#include "engine/dash_ability.h"
 #include "engine/entity.h"
 #include "engine/resman.h"
 #include <math.h>
@@ -31,13 +32,8 @@ Entity *PlayerNew(v2 pos, Color tint) {
     self->jumps_left = 1;
     self->jump_force = -125.f;
     self->stomp_force = 170.f;
-    self->dash_force = 150.f;
-    self->dashes = 3;
-    self->dashes_left = 3;
-    self->dashing = false;
-    self->dash_duration = 0.10f;
-    self->dash_timer = GetTime();
     self->base.tint = tint;
+    self->dash_abil = DashNew(160, 3, 0.1f);
     return (Entity *)self;
 }
 void _ep_on_collide_wall(Entity *s, v2 normal) {
@@ -45,7 +41,7 @@ void _ep_on_collide_wall(Entity *s, v2 normal) {
     if (normal.y < 0) {
         self->onground = true;
         self->jumps_left = self->jumps;
-        self->dashes_left = self->dashes;
+        DashRestore(&self->dash_abil);
     }
 }
 void _ep_on_collide_entity(Entity *s, Entity *other) {
@@ -53,10 +49,6 @@ void _ep_on_collide_entity(Entity *s, Entity *other) {
     if (other->collides_w_entity) {
         self->alive = false;
     }
-}
-void _ep_reset_dash(Player *self) {
-    self->dashing = false;
-    self->dash_timer = GetTime();
 }
 void _ep_on_update(Entity *s, World *ctx) {
     Player *self = (Player *)s;
@@ -72,8 +64,8 @@ void _ep_on_update(Entity *s, World *ctx) {
         if (!self->onground) {
             self->jumps_left--;
         }
-        if (self->dashing) {
-            _ep_reset_dash(self);
+        if (self->dash_abil.dashing) {
+            DashReset(&self->dash_abil);
         }
         Sound s;
         ResManGetSound("player_jump", &s);
@@ -82,32 +74,27 @@ void _ep_on_update(Entity *s, World *ctx) {
         self->jump_buf = false;
     }
     f32 hor = IsKeyDown(KEY_D) - IsKeyDown(KEY_A);
-    if (IsKeyPressed(KEY_LEFT_SHIFT) && !self->dashing &&
-        self->dashes_left > 0 && hor != 0) {
-        self->base.vel.x = hor * self->dash_force;
-        self->dashing = true;
-        self->dash_timer = GetTime();
-        self->dashes_left--;
-        Sound s;
-        ResManGetSound("player_dash", &s);
-        PlaySound(s);
-    } else if (!self->dashing) {
+    if (IsKeyPressed(KEY_LEFT_SHIFT)) {
+        if (DashPerform(&self->dash_abil, (v2){hor}, (Entity *)self)) {
+            Sound s;
+            ResManGetSound("player_dash", &s);
+            PlaySound(s);
+        }
+    } else if (!self->dash_abil.dashing) {
         self->base.vel.x = hor * self->base.spd;
-    } else if (self->dashing) {
+        self->base.affected_by_gravity = true;
+    } else if (self->dash_abil.dashing) {
         self->base.affected_by_gravity = false;
         self->base.vel.y = 0;
     }
     if (IsKeyPressed(KEY_S)) {
-        _ep_reset_dash(self);
+        DashReset(&self->dash_abil);
         self->base.vel.y = self->stomp_force;
         self->base.vel.x = 0.f;
         Sound s;
         ResManGetSound("player_stomp", &s);
         PlaySound(s);
     }
-    if (GetTime() - self->dash_timer > self->dash_duration) {
-        _ep_reset_dash(self);
-        self->base.affected_by_gravity = true;
-    }
+    DashUpdate(&self->dash_abil, (Entity *)self);
     self->onground = false;
 }
