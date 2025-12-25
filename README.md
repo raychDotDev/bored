@@ -1,4 +1,4 @@
-YOU CAN DOWNLOAD CURRENT RELEASE AT THE [ITCH.IO](https://raychaser29.itch.io/bored)
+YOU CAN DOWNLOAD CURRENT WINDOWS RELEASE AT THE [ITCH.IO](https://raychaser29.itch.io/bored)
 ---
 The game is simple
 
