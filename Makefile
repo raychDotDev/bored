@@ -9,7 +9,6 @@ CC = gcc
 CCFLAGS += -std=c2x
 CCFLAGS += -Wall
 CCFLAGS += -g
-LDFLAGS += -mwindows
 CCFLAGS += -static
 LDFLAGS += -static-libgcc
 CCFLAGS += -Iinclude
@@ -17,7 +16,10 @@ CCFLAGS += -Iinclude
 ifeq ($(UNAME),Windows)
 	LDFLAGS += -static
 	LDFLAGS += -lraylib
-	LDFLAGS += -lwinmm -lgdi32 -lopengl32
+	LDFLAGS += -mwindows
+	LDFLAGS += -lwinmm 
+	LDFLAGS += -lgdi32 
+	LDFLAGS += -lopengl32
 	EXE_SUFFIX := .exe
 else ifeq ($(UNAME),Linux)
 	LDFLAGS += -lraylib -lm -ldl
