@@ -5,3 +5,5 @@ void GameInit();
 void GameRun();
 void GameSetScreen(Screen *screen);
 void GameStop();
+void GameCRTOn();
+void GameCRTOff();

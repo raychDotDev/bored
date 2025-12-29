@@ -87,6 +87,7 @@ void _msc_draw(Screen *s) {
     }
     EndMode2D();
     if (!p->alive || !self->started) {
+        GameCRTOn();
         DrawRectangleV((v2){}, (v2){GetScreenWidth(), GetScreenHeight()},
                        outer);
         f32 ts = 8 * self->camera.zoom;
@@ -100,6 +101,8 @@ void _msc_draw(Screen *s) {
             DrawText(secs, ww / 2.f - secs_s / 2, wh / 2 - ts, ts,
                      self->w->inner_color);
         }
+    } else {
+        GameCRTOff();
     }
 }
 void _msc_update(Screen *s) {

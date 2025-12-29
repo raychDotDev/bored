@@ -6,6 +6,7 @@
 HashTable *imageMap;
 HashTable *textureMap;
 HashTable *soundMap;
+HashTable *shaderMap;
 
 void _rmLoad() {
     const char *cwd = GetWorkingDirectory();
@@ -27,6 +28,10 @@ void _rmLoad() {
             Sound *s = MemAlloc(sizeof(Sound));
             *s = LoadSound(path);
             HTSet(soundMap, name, s);
+        } else if (TextIsEqual(ext, ".fs")) {
+            Shader *s = MemAlloc(sizeof(Shader));
+            *s = LoadShader(nullptr, path);
+            HTSet(shaderMap, name, s);
         }
     }
     TraceLog(LOG_INFO, "RESMAN: Loaded %d images", imageMap->count);
@@ -37,6 +42,7 @@ void ResManInit() {
     imageMap = HTCreate();
     textureMap = HTCreate();
     soundMap = HTCreate();
+    shaderMap = HTCreate();
     TraceLog(LOG_INFO, "RESMAN: Image table created successfully");
     _rmLoad();
 }
@@ -55,12 +61,27 @@ void ResManDispose() {
         Sound *s = HTGet(soundMap, keys[i]);
         UnloadSound(*s);
     }
+    MemFree(keys);
+    keys = HTGetKeys(shaderMap, &count);
+    for (i32 i = 0; i < count; i++) {
+        Shader *s = HTGet(shaderMap, keys[i]);
+        UnloadShader(*s);
+    }
+    MemFree(keys);
     HTDestroy(imageMap);
     HTDestroy(textureMap);
     HTDestroy(soundMap);
     TraceLog(LOG_INFO, "RESMAN: Unloaded asset tables successfully");
 }
 
+bool ResManGetShader(const char *key, Shader *out) {
+    Shader *res = HTGet(shaderMap, key);
+    if (res) {
+        *out = *res;
+        return true;
+    }
+    return false;
+}
 bool ResManGetSound(const char *key, Sound *out) {
     Sound *res = HTGet(soundMap, key);
     if (res) {
