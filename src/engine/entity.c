@@ -54,8 +54,8 @@ void EntityUpdate(Entity *self, World *ctx) {
                 v2 normal_self =
                     Vector2Normalize(Vector2Subtract(self->pos, other->pos));
                 v2 normal_other = Vector2Negate(normal_self);
-                f32 vel_self = Vector2Length(self->vel) * 0.5;
-                f32 vel_other = Vector2Length(other->vel) * 0.5;
+                f32 vel_self = Vector2Length(self->vel) * 0.8;
+                f32 vel_other = Vector2Length(other->vel) * 0.8;
                 other->vel = Vector2Scale(normal_other, vel_self);
                 other->pos = Vector2Subtract(
                     other->pos, Vector2Scale(normal_self, overlap));

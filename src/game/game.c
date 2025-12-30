@@ -20,7 +20,7 @@ void GameInit() {
     InitWindow(INIT_WINDOW_SIZE.x, INIT_WINDOW_SIZE.y, "");
     InitAudioDevice();
     // SetMasterVolume(0.3f);
-    SetTargetFPS(240);
+    SetTargetFPS(60);
     SetWindowTitle(TextFormat("bored v.%.1f", GAME_VERSION));
     ResManInit();
     prev_win_size = INIT_WINDOW_SIZE;
@@ -67,7 +67,7 @@ void GameDraw() {
 }
 void gs_reload_canvas(v2i new_size) {
     UnloadRenderTexture(self.canvas);
-    self.canvas = LoadRenderTexture(new_size.x, new_size.y);
+    self.canvas = LoadRenderTexture(new_size.x * 0.5, new_size.y * 0.5);
 }
 void GameUpdate() {
     v2i ss = {GetScreenWidth(), GetScreenHeight()};

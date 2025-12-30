@@ -2,10 +2,8 @@
 #include "engine/dash_ability.h"
 #include "engine/entity.h"
 #include "engine/resman.h"
-#include <math.h>
 #include <raylib.h>
 #include <raymath.h>
-#include <stdio.h>
 
 void _ep_on_collide_entity(Entity *s, Entity *other);
 void _ep_on_update(Entity *s, World *ctx);
@@ -31,9 +29,9 @@ Entity *PlayerNew(v2 pos, Color tint) {
     self->jumps = 1;
     self->jumps_left = 1;
     self->jump_force = -125.f;
-    self->stomp_force = 170.f;
+    self->stomp_force = 180.f;
     self->base.tint = tint;
-    self->dash_abil = DashNew(160, 3, 0.1f);
+    self->dash_abil = DashNew(180, 3, 0.1f);
     return (Entity *)self;
 }
 void _ep_on_collide_wall(Entity *s, v2 normal) {
