@@ -28,7 +28,7 @@ void _rmLoad() {
             Sound *s = MemAlloc(sizeof(Sound));
             *s = LoadSound(path);
             HTSet(soundMap, name, s);
-        } else if (TextIsEqual(ext, ".fs")) {
+        } else if (TextIsEqual(ext, ".glsl")) {
             Shader *s = MemAlloc(sizeof(Shader));
             *s = LoadShader(nullptr, path);
             HTSet(shaderMap, name, s);

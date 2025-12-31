@@ -26,7 +26,7 @@ void _msc_update_camera(MainScreen *self, v2 targetPos) {
         Vector2Lerp(self->camera.target, targetPos, 7.5f * GetFrameTime());
     self->camera.offset = sshalf;
     self->camera.rotation = 0.f;
-    self->camera.zoom = fabsf(ss.y / self->w->size.y) * 0.4f;
+    self->camera.zoom = fabsf(ss.y / self->w->size.y) * 0.5f;
 }
 void _msc_set_pallette(MainScreen *self, u32 index) {
     self->w->outer_color = self->palletes[index][0];

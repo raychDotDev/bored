@@ -20,7 +20,8 @@ void GameInit() {
     InitWindow(INIT_WINDOW_SIZE.x, INIT_WINDOW_SIZE.y, "");
     InitAudioDevice();
     // SetMasterVolume(0.3f);
-    SetTargetFPS(60);
+    SetConfigFlags(FLAG_VSYNC_HINT);
+    // SetTargetFPS();
     SetWindowTitle(TextFormat("bored v.%.1f", GAME_VERSION));
     ResManInit();
     prev_win_size = INIT_WINDOW_SIZE;
@@ -44,11 +45,15 @@ void GameDraw() {
     Shader s;
     bool res = false;
     if (crt)
-        res = ResManGetShader("crt", &s);
+        res = ResManGetShader("crt_frag", &s);
     f32 t = GetTime();
+    i32 rand_min = 0, rand_max = 255;
+    f32 r = (f32)GetRandomValue(rand_min, rand_max) / (f32)rand_max;
     v2 ss = {GetScreenWidth(), GetScreenHeight()};
     DrawTexturePro(self.canvas.texture, src, dest, (v2){0.f, 0.f}, 0.f, WHITE);
     if (res) {
+        SetShaderValue(s, GetShaderLocation(s, "rand"), &r,
+                       SHADER_UNIFORM_FLOAT);
         SetShaderValue(s, GetShaderLocation(s, "time"), &t,
                        SHADER_UNIFORM_FLOAT);
         SetShaderValue(s, GetShaderLocation(s, "resolution"), &ss,
@@ -67,7 +72,7 @@ void GameDraw() {
 }
 void gs_reload_canvas(v2i new_size) {
     UnloadRenderTexture(self.canvas);
-    self.canvas = LoadRenderTexture(new_size.x * 0.5, new_size.y * 0.5);
+    self.canvas = LoadRenderTexture(new_size.x, new_size.y);
 }
 void GameUpdate() {
     v2i ss = {GetScreenWidth(), GetScreenHeight()};
