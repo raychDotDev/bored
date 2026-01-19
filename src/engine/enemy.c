@@ -52,9 +52,8 @@ void _ee_update(Entity *s, World *ctx) {
     v2 dir_to_target =
         Vector2Normalize(Vector2Subtract(self->target->pos, self->base.pos));
     if (!self->dashing) {
-        f32 dist_to_target = Vector2Distance(self->base.pos, self->target->pos);
-        if (dist_to_target >= self->dist_to_dash &&
-            self->dash_cd_timer >= self->dash_cd) {
+        // f32 dist_to_target = Vector2Distance(self->base.pos, self->target->pos);
+        if (self->dash_cd_timer >= self->dash_cd) {
             _ee_reset_dash(self);
             self->dashing = true;
             self->base.vel = Vector2Scale(dir_to_target, self->dash_force);

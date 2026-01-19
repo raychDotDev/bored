@@ -16,7 +16,7 @@ CCFLAGS += -Iinclude
 ifeq ($(UNAME),Windows)
 	LDFLAGS += -static
 	LDFLAGS += -lraylib
-	LDFLAGS += -mwindows
+	# LDFLAGS += -mwindows
 	LDFLAGS += -lwinmm 
 	LDFLAGS += -lgdi32 
 	LDFLAGS += -lopengl32
