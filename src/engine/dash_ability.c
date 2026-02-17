@@ -8,19 +8,20 @@ DashAbility DashNew(f32 force, u32 max_dashes, f32 duration) {
     self.dashes_left = 3;
     self.dashing = false;
     self.dash_duration = 0.10f;
-    self.dash_timer = GetTime();
+    self.dash_timer = 0.f;
     return self;
 }
 
 void DashReset(DashAbility *self) {
     self->dashing = false;
-    self->dash_timer = GetTime();
+    self->dash_timer = 0.f;
 }
 
-void DashUpdate(DashAbility *self, Entity *target) {
-    if (GetTime() - self->dash_timer > self->dash_duration) {
+void DashUpdate(DashAbility *self, Entity *target, f32 time) {
+    if (self->dash_timer > self->dash_duration) {
 		DashReset(self);
     }
+	self->dash_timer += time;
 }
 
 void DashRestore(DashAbility *self) { 
@@ -39,7 +40,7 @@ bool DashPerform(DashAbility *self, v2 dir, Entity *target) {
             target->vel.y = dir.y * self->dash_force;
         }
         self->dashing = true;
-        self->dash_timer = GetTime();
+        self->dash_timer = 0.f;
         self->dashes_left--;
         return true;
     }

@@ -63,10 +63,10 @@ Entity *WorldGetEntity(World *self, u32 index) {
     return self->entities[index];
 }
 
-void WorldUpdate(World *self) {
+void WorldUpdate(World *self, f32 dt) {
     if (!self)
         return;
     for (i32 i = 0; i < self->entities_count; i++) {
-        EntityUpdate(self->entities[i], self);
+        EntityUpdate(self->entities[i], self, dt);
     }
 }

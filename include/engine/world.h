@@ -21,4 +21,4 @@ void WorldAddEntity(World *self, Entity *value);
 void WorldRemoveEntity(World *self, u32 at);
 Entity *WorldGetEntity(World *self, u32 index);
 
-void WorldUpdate(World*self);
+void WorldUpdate(World*self, f32 dt);

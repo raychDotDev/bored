@@ -5,9 +5,9 @@
 #include "fixed.h"
 #include <raymath.h>
 
-void _ee_update(Entity *s, World *ctx);
-void _ee_collide_e(Entity *s, Entity *other);
-void _ee_collide_w(Entity *s, v2 normal);
+void _ee_update(Entity *s, World *ctx, f32 dt);
+void _ee_collide_e(Entity *s, Entity *other, f32 dt);
+void _ee_collide_w(Entity *s, v2 normal, f32 dt);
 Entity *EnemyNew(v2 pos, Color tint, Color tint2) {
     Enemy *self = MemAlloc(sizeof(Enemy));
     self->base = EntityNew();
@@ -37,7 +37,7 @@ void _ee_reset_dash(Enemy *self) {
     self->dash_timer = 0.f;
     self->dash_cd_timer = 0.f;
 }
-void _ee_update(Entity *s, World *ctx) {
+void _ee_update(Entity *s, World *ctx, f32 dt) {
     Enemy *self = (Enemy *)s;
     if (!self->target) {
         for (i32 i = 0; i < ctx->entities_count; i++) {
@@ -61,22 +61,22 @@ void _ee_update(Entity *s, World *ctx) {
             ResManGetSound("enemy_dash", &s);
             PlaySound(s);
         } else {
-            self->dash_cd_timer += GetFrameTime();
+            self->dash_cd_timer += dt;
             EntityApplyForce(
                 (Entity *)self,
                 Vector2Scale(dir_to_target,
-                             self->base.spd - self->base.spd * dash_eh));
+                             self->base.spd - self->base.spd * dash_eh), dt);
         }
     } else {
         if (self->dash_timer > self->dash_time) {
             self->dashing = false;
             _ee_reset_dash(self);
         }
-        self->dash_timer += GetFrameTime();
+        self->dash_timer += dt;
     }
     self->base.tint = ColorLerp(self->tint3, self->tint2, dash_eh);
 }
-void _ee_collide_e(Entity *s, Entity *other) {
+void _ee_collide_e(Entity *s, Entity *other, f32 dt) {
     Enemy *self = (Enemy *)s;
     self->dashing = false;
     Sound sound;
@@ -84,7 +84,7 @@ void _ee_collide_e(Entity *s, Entity *other) {
     PlaySound(sound);
     // _ee_reset_dash(self);
 }
-void _ee_collide_w(Entity *s, v2 normal) {
+void _ee_collide_w(Entity *s, v2 normal, f32 dt) {
     Enemy *self = (Enemy *)s;
     self->dashing = false;
     Sound sound;

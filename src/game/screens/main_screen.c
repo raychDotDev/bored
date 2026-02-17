@@ -23,7 +23,7 @@ void _msc_update_camera(MainScreen *self, v2 targetPos) {
     v2 ss = {GetScreenWidth(), GetScreenHeight()};
     v2 sshalf = {ss.x / 2, ss.y / 2};
     self->camera.target =
-        Vector2Lerp(self->camera.target, targetPos, 7.5f * GetFrameTime());
+        Vector2Lerp(self->camera.target, targetPos, 7.5f * GameGetFrameTime());
     self->camera.offset = sshalf;
     self->camera.rotation = 0.f;
     self->camera.zoom = fabsf(ss.y / self->w->size.y) * 0.5f;
@@ -95,7 +95,7 @@ void _msc_draw(Screen *s) {
         f32 text_s = MeasureText(text, ts);
         DrawText(text, ww / 2.f - text_s / 2, wh / 2, ts, self->w->inner_color);
         if (!p->alive) {
-            const char *secs = "YOUR SCORE: %.1f SECONDS";
+            const char *secs = "YOUR SCORE: %.3f SECONDS";
             secs = TextFormat(secs, self->seconds);
             f32 secs_s = MeasureText(text, ts);
             DrawText(secs, ww / 2.f - secs_s / 2, wh / 2 - ts, ts,
@@ -128,9 +128,9 @@ void _msc_update(Screen *s) {
             if (!e || e == p)
                 continue;
             v2 dir = Vector2Normalize(Vector2Subtract(p->pos, e->pos));
-            EntityApplyForce(e, Vector2Scale(dir, e->spd));
+            EntityApplyForce(e, Vector2Scale(dir, e->spd), GameGetFrameTime());
         }
-        WorldUpdate(self->w);
+        WorldUpdate(self->w, GameGetFrameTime());
     } else {
         if (IsKeyPressed(KEY_SPACE)) {
             self->started = true;
@@ -138,7 +138,7 @@ void _msc_update(Screen *s) {
         }
     }
     if (((Player *)p)->alive && self->started) {
-        self->seconds += GetFrameTime();
+        self->seconds += GameGetFrameTime();
     }
 }
 Screen *MainScreenNew(bool started) {

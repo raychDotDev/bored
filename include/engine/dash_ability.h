@@ -14,5 +14,5 @@ typedef struct _da {
 DashAbility DashNew(f32 force, u32 max_dashes, f32 duration);
 void DashRestore(DashAbility *self);
 void DashReset(DashAbility *self);
-void DashUpdate(DashAbility *self, Entity *target);
+void DashUpdate(DashAbility *self, Entity *target, f32 dt);
 bool DashPerform(DashAbility *self, v2 dir, Entity *target);

@@ -10,18 +10,31 @@ typedef struct _gs {
     Screen *screen;
     bool running;
     RenderTexture2D canvas;
+	f32 timeFactor;
+	f32 time, dt;
 } GameState;
 
 GameState self;
 
+f32 GameGetFrameTime() {
+	return self.dt;
+}
+f32 GameGetTime() {
+	return self.time;
+}
 void GameInit() {
-    self = (GameState){.screen = nullptr, .running = true};
+    self = (GameState){
+		.screen = nullptr,
+		.running = true, 
+		.time = 0.f, 
+		.dt = 0.f, 
+		.timeFactor = 1.0f};
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(INIT_WINDOW_SIZE.x, INIT_WINDOW_SIZE.y, "");
     InitAudioDevice();
     // SetMasterVolume(0.3f);
     SetConfigFlags(FLAG_VSYNC_HINT);
-    // SetTargetFPS();
+    SetTargetFPS(120);
     SetWindowTitle(TextFormat("bored v.%.1f", GAME_VERSION));
     ResManInit();
     prev_win_size = INIT_WINDOW_SIZE;
@@ -75,6 +88,8 @@ void gs_reload_canvas(v2i new_size) {
     self.canvas = LoadRenderTexture(new_size.x, new_size.y);
 }
 void GameUpdate() {
+	self.dt = GetFrameTime() * self.timeFactor;
+	self.time += self.dt;
     v2i ss = {GetScreenWidth(), GetScreenHeight()};
     if (prev_win_size.x != ss.x || prev_win_size.y != ss.y) {
         prev_win_size = ss;

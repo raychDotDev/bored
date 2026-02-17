@@ -7,19 +7,6 @@
 #include <stdio.h>
 
 i32 main() {
-    InitWindow(720, 480, "game");
-    SetTargetFPS(120);
-    i32 gamepad = 0;
-    while (!WindowShouldClose()) {
-		BeginDrawing();
-		ClearBackground(BLACK);
-		EndDrawing();
-        if (IsGamepadAvailable(gamepad)) {
-        }
-    }
-
-    CloseWindow();
-    return 0;
     GameInit();
     GameSetScreen(MainScreenNew(false));
     GameRun();

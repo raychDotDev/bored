@@ -5,9 +5,9 @@
 #include <raylib.h>
 #include <raymath.h>
 
-void _ep_on_collide_entity(Entity *s, Entity *other);
-void _ep_on_update(Entity *s, World *ctx);
-void _ep_on_collide_wall(Entity *s, v2 normal);
+void _ep_on_collide_entity(Entity *s, Entity *other, f32 dt);
+void _ep_on_update(Entity *s, World *ctx, f32 dt);
+void _ep_on_collide_wall(Entity *s, v2 normal, f32 dt);
 Entity *PlayerNew(v2 pos, Color tint) {
     Player *self = MemAlloc(sizeof(Player));
     self->base = EntityNew();
@@ -15,7 +15,7 @@ Entity *PlayerNew(v2 pos, Color tint) {
     self->base.pos = pos;
     self->base.rad = 2.f;
     self->base.spd = 80.f;
-    self->base.friction = 0.f;
+    self->base.friction = 0.5f;
     self->base.affected_by_gravity = true;
     self->base.collides_w_entity = false;
     self->base.on_collide_entity = _ep_on_collide_entity;
@@ -34,7 +34,7 @@ Entity *PlayerNew(v2 pos, Color tint) {
     self->dash_abil = DashNew(180, 3, 0.1f);
     return (Entity *)self;
 }
-void _ep_on_collide_wall(Entity *s, v2 normal) {
+void _ep_on_collide_wall(Entity *s, v2 normal, f32 dt) {
     Player *self = (Player *)s;
     if (normal.y < 0) {
         self->onground = true;
@@ -42,13 +42,13 @@ void _ep_on_collide_wall(Entity *s, v2 normal) {
         DashRestore(&self->dash_abil);
     }
 }
-void _ep_on_collide_entity(Entity *s, Entity *other) {
+void _ep_on_collide_entity(Entity *s, Entity *other, f32 dt) {
     Player *self = (Player *)s;
     if (other->collides_w_entity) {
         self->alive = false;
     }
 }
-void _ep_on_update(Entity *s, World *ctx) {
+void _ep_on_update(Entity *s, World *ctx, f32 dt) {
     Player *self = (Player *)s;
     if (IsKeyPressed(KEY_SPACE)) {
         self->jump_buf = true;
@@ -93,6 +93,6 @@ void _ep_on_update(Entity *s, World *ctx) {
         ResManGetSound("player_stomp", &s);
         PlaySound(s);
     }
-    DashUpdate(&self->dash_abil, (Entity *)self);
+    DashUpdate(&self->dash_abil, (Entity *)self, dt);
     self->onground = false;
 }
