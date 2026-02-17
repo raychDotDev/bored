@@ -104,6 +104,7 @@ void _msc_draw(Screen *s) {
     } else {
         GameCRTOff();
     }
+	DrawFPS(10,10);
 }
 void _msc_update(Screen *s) {
     MainScreen *self = (MainScreen *)s;
