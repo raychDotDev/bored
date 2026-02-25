@@ -20,11 +20,13 @@ typedef struct _e {
     void (*on_update)(Entity *self, World *ctx, f32 dt);
     void (*on_collide_entity)(Entity *self, Entity *other, f32 dt);
     void (*on_collide_wall)(Entity *self, v2 normal, f32 dt);
+    void (*on_draw)(Entity *self, World *ctx, f32 dt);
 } Entity;
 
 Entity EntityNew();
 void EntityDispose(Entity *self);
 
+void EntityDraw(Entity *self, World *ctx, f32 dt);
 void EntityUpdate(Entity *self, World *ctx, f32 dt);
 void EntityCollideEntity(Entity *self, Entity *other, f32 dt);
 void EntityCollideWall(Entity *self, v2 normal, f32 dt);

@@ -16,8 +16,8 @@ Entity *EnemyNew(v2 pos, Color tint, Color tint2) {
     self->base.tint = tint;
     self->tint2 = tint;
     self->tint3 = tint2;
-    self->base.rad = 3.f;
-    self->base.spd = 170.f;
+    self->base.rad = 3.24f;
+    self->base.spd = 190.f;
     self->base.evwct = EVWCT_BOUNCE;
     self->base.affected_by_gravity = false;
     self->base.on_update = _ee_update;
@@ -26,7 +26,7 @@ Entity *EnemyNew(v2 pos, Color tint, Color tint2) {
     self->dashing = false;
     self->dash_force = 190.f;
     self->dash_timer = 0.f;
-    self->dash_time = 0.1f;
+    self->dash_time = 0.10f;
     self->dash_cd = 3.f;
     self->dash_cd_timer = 0.f;
     self->dist_to_dash = 30.f;

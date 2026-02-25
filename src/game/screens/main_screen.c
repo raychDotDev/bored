@@ -44,7 +44,7 @@ void _msc_load(Screen *s) {
     self->palletes[2][0] = (Color){0, 10, 0, 255};
     self->palletes[2][1] = (Color){238, 206, 0, 255};
     self->palletes[2][2] = (Color){224, 118, 0, 255};
-    self->w = WorldCreate((v2){150, 50});
+    self->w = WorldCreate((v2){100, 40});
     _msc_set_pallette(self, 0);
     Entity *player =
         PlayerNew((v2){self->w->size.x * 0.5f, self->w->size.y * 0.5f},
@@ -83,7 +83,7 @@ void _msc_draw(Screen *s) {
              ts, outer);
     for (i32 i = 0; i < self->w->entities_count; i++) {
         Entity *e = self->w->entities[i];
-        DrawCircleV(e->pos, e->rad, e->tint);
+		EntityDraw(e, self->w, GameGetFrameTime());
     }
     EndMode2D();
     if (!p->alive || !self->started) {

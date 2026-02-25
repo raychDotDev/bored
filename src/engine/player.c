@@ -8,12 +8,13 @@
 void _ep_on_collide_entity(Entity *s, Entity *other, f32 dt);
 void _ep_on_update(Entity *s, World *ctx, f32 dt);
 void _ep_on_collide_wall(Entity *s, v2 normal, f32 dt);
+void _ep_on_draw(Entity *s, World *ctx, f32 dt);
 Entity *PlayerNew(v2 pos, Color tint) {
     Player *self = MemAlloc(sizeof(Player));
     self->base = EntityNew();
     self->base.flag = 0;
     self->base.pos = pos;
-    self->base.rad = 2.f;
+    self->base.rad = 1.4f;
     self->base.spd = 80.f;
     self->base.friction = 0.5f;
     self->base.affected_by_gravity = true;
@@ -21,6 +22,7 @@ Entity *PlayerNew(v2 pos, Color tint) {
     self->base.on_collide_entity = _ep_on_collide_entity;
     self->base.on_collide_wall = _ep_on_collide_wall;
     self->base.on_update = _ep_on_update;
+    self->base.on_draw = _ep_on_draw;
     self->alive = true;
     self->jump_buf = false;
     self->jump_timer = GetTime();
@@ -95,4 +97,10 @@ void _ep_on_update(Entity *s, World *ctx, f32 dt) {
     }
     DashUpdate(&self->dash_abil, (Entity *)self, dt);
     self->onground = false;
+}
+
+void _ep_on_draw(Entity *s, World *ctx, f32 dt) {
+	Player* self = (Player*)s;
+	DrawCircleV(self->base.pos, self->base.rad + self->base.rad * 0.4, self->base.tint);
+	// DrawCircleLinesV(self->base.pos, self->base.rad , WHITE);
 }

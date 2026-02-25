@@ -28,13 +28,13 @@ void GameInit() {
 		.running = true, 
 		.time = 0.f, 
 		.dt = 0.f, 
-		.timeFactor = 1.0f};
+		.timeFactor = 1.f};
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(INIT_WINDOW_SIZE.x, INIT_WINDOW_SIZE.y, "");
     InitAudioDevice();
     // SetMasterVolume(0.3f);
     // SetConfigFlags(FLAG_VSYNC_HINT);
-    SetTargetFPS(240);
+    SetTargetFPS(60);
     SetWindowTitle(TextFormat("bored v.%.1f", GAME_VERSION));
     ResManInit();
     prev_win_size = INIT_WINDOW_SIZE;

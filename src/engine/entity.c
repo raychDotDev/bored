@@ -16,6 +16,7 @@ Entity EntityNew() {
 		.tint = BLACK,
 		.on_collide_entity = nullptr,
 		.on_collide_wall = nullptr,
+		.on_draw = nullptr,
 		.affected_by_gravity = true,
 		.collides_w_entity = true,
 		.evwct = EVWCT_SLIDE,
@@ -116,4 +117,12 @@ void EntityApplyForce(Entity *self, v2 force, f32 dt) {
 	if (!self)
 		return;
 	self->vel = Vector2Add(self->vel, Vector2Scale(force, dt));
+}
+void EntityDraw(Entity *e, World *ctx, f32 dt) {
+	if (!e) return;
+	if (!e->on_draw) {
+		DrawCircleV(e->pos, e->rad, e->tint);
+		return;
+	}
+	e->on_draw(e, ctx, dt);
 }
