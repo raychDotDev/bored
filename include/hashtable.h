@@ -1,8 +1,51 @@
-#include "engine/hashtable.h"
+/* Copyright (c) 2025-2026 Daniil "raychDotDev" Potapov
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+#ifndef HASHTABLE_H
+#define HASHTABLE_H
+
+#include "types.h"
+#define HASH_TABLE_MAX_SIZE 8096
+typedef struct _hti HashTableItem;
+typedef struct _hti {
+    const char *key;
+    void *value;
+    HashTableItem *next;
+} HashTableItem;
+
+typedef struct _ht {
+    HashTableItem **items;
+    u64 count;
+} HashTable;
+
+HashTable *HTCreate();
+void HTDestroy(HashTable *self);
+
+void HTSet(HashTable *self, const char *key, void *value);
+void *HTGet(HashTable *self, const char *key);
+void HTDelete(HashTable *self, const char *key);
+const char **HTGetKeys(HashTable *self, i32 *count);
+
+#ifdef HASHTABLE_IMPL
 #include <raylib.h>
 #include <string.h>
-
-#define HASH_TABLE_MAX_SIZE 8096
 
 // djb33 hash function
 u64 Hash(const char *s, u64 len) {
@@ -132,3 +175,5 @@ const char **HTGetKeys(HashTable *self, i32 *count) {
     }
     return keys;
 }
+#endif
+#endif
