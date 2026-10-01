@@ -7,6 +7,7 @@ HashTable *imageMap;
 HashTable *textureMap;
 HashTable *soundMap;
 HashTable *shaderMap;
+HashTable *fontMap;
 
 void _rmLoad() {
     const char *cwd = GetWorkingDirectory();
@@ -32,18 +33,34 @@ void _rmLoad() {
             Shader *s = MemAlloc(sizeof(Shader));
             *s = LoadShader(nullptr, path);
             HTSet(shaderMap, name, s);
+        } else if (TextIsEqual(ext, ".ttf") || TextIsEqual(ext, ".otf")) {
+            Font *f = MemAlloc(sizeof(Font));
+            i32 codepoints[0x0500];
+            for (i32 i = 0; i < 0x0500; i++)
+                codepoints[i] = i;
+            *f = LoadFontEx(path, 60, codepoints,
+                            sizeof(codepoints) / sizeof(codepoints[0]));
+            HTSet(fontMap, name, f);
         }
     }
     TraceLog(LOG_INFO, "RESMAN: Loaded %d images", imageMap->count);
+    TraceLog(LOG_INFO, "RESMAN: Loaded %d textures", textureMap->count);
+    TraceLog(LOG_INFO, "RESMAN: Loaded %d shaders", shaderMap->count);
+    TraceLog(LOG_INFO, "RESMAN: Loaded %d fonts", fontMap->count);
     TraceLog(LOG_INFO, "RESMAN: Loaded %d sounds", soundMap->count);
     UnloadDirectoryFiles(list);
 }
 void ResManInit() {
     imageMap = HTCreate();
+    TraceLog(LOG_INFO, "RESMAN: Image table was created");
     textureMap = HTCreate();
+    TraceLog(LOG_INFO, "RESMAN: Texture table was created");
     soundMap = HTCreate();
+    TraceLog(LOG_INFO, "RESMAN: Sound table was created");
     shaderMap = HTCreate();
-    TraceLog(LOG_INFO, "RESMAN: Image table created successfully");
+    TraceLog(LOG_INFO, "RESMAN: Shader table was created");
+    fontMap = HTCreate();
+    TraceLog(LOG_INFO, "RESMAN: Font table was created");
     _rmLoad();
 }
 void ResManDispose() {
@@ -68,9 +85,17 @@ void ResManDispose() {
         UnloadShader(*s);
     }
     MemFree(keys);
+    keys = HTGetKeys(fontMap, &count);
+    for (i32 i = 0; i < count; i++) {
+        Font *s = HTGet(fontMap, keys[i]);
+        UnloadFont(*s);
+    }
+    MemFree(keys);
     HTDestroy(imageMap);
     HTDestroy(textureMap);
     HTDestroy(soundMap);
+    HTDestroy(fontMap);
+    HTDestroy(shaderMap);
     TraceLog(LOG_INFO, "RESMAN: Unloaded asset tables successfully");
 }
 
@@ -106,4 +131,26 @@ bool ResManGetTexture(const char *key, Texture2D *out) {
     }
     return false;
 }
-const char **ResManGetKeys(i32 *count) { return HTGetKeys(imageMap, count); }
+
+bool ResManGetFont(const char *key, Font *out) {
+    Font *res = HTGet(fontMap, key);
+    if (res) {
+        *out = *res;
+        return true;
+    }
+    return false;
+}
+
+const char **ResManGetTexutreKeys(i32 *count) {
+    return HTGetKeys(textureMap, count);
+}
+const char **ResManGetSoundKeys(i32 *count) {
+    return HTGetKeys(soundMap, count);
+}
+const char **ResManGetShaderKeys(i32 *count) {
+    return HTGetKeys(shaderMap, count);
+}
+const char **ResManGetImageKeys(i32 *count) {
+    return HTGetKeys(imageMap, count);
+}
+const char **ResManGetFontKeys(i32 *count) { return HTGetKeys(fontMap, count); }
