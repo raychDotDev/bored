@@ -12,7 +12,7 @@ CCFLAGS += -g
 # LDFLAGS += -mwindows
 CCFLAGS += -static
 LDFLAGS += -static-libgcc
-CCFLAGS += -Iinclude
+CCFLAGS += -Iinclude -Isrc
 
 ifeq ($(UNAME),Windows)
 	LDFLAGS += -static

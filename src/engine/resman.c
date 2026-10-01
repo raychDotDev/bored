@@ -1,6 +1,6 @@
-#include "engine/resman.h"
-#include "engine/hashtable.h"
-#include "fixed.h"
+#include "resman.h"
+#include "hashtable.h"
+#include "types.h"
 #include <raylib.h>
 
 HashTable *imageMap;

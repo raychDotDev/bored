@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fixed.h"
+#include "types.h"
 #include <raylib.h>
 
 void ResManInit();

@@ -1,13 +1,10 @@
-#include "engine/entity.h"
-#include "engine/world.h"
-#include "fixed.h"
-#include "game/game.h"
-#include "game/screens/main_screen.h"
-#include <stdio.h>
+#include "types.h"
+#include "engine/app.h"
+#include "game/states/mmst.h"
 
 i32 main() {
-    GameInit();
-    GameSetScreen(MainScreenNew(false));
-    GameRun();
+    AppInit();
+    AppSetState(MainMenuState_New(false));
+    AppRun();
     return 0;
 }

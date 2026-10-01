@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fixed.h"
+#include "types.h"
 typedef struct _hti HashTableItem;
 typedef struct _hti {
     const char *key;

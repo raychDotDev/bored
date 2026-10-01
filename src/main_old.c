@@ -1,4 +1,4 @@
-#include "fixed.h"
+#include "types.h"
 #include <raylib.h>
 #include <raymath.h>
 #define GRAVITY 9.8f
