@@ -16,7 +16,8 @@ void _msc_draw(AppState *s) {
     Font f;
     bool res = ResManGetResource("departure", RES_FONT, &f);
     if (res)
-        DrawTextEx(f, "hello, мир!", Vector2Zero(), 60, 1, WHITE);
+        DrawTextEx(f, ResManGetLocaleString(AppGetLocale(), "startgame", nullptr),
+                   Vector2Zero(), 60, 1, WHITE);
 }
 void _msc_update(AppState *s) { MainMenuState *self = (MainMenuState *)s; }
 
