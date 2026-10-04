@@ -41,7 +41,9 @@ void _rmLoad() {
             *f = LoadFontEx(path, 60, codepoints,
                             sizeof(codepoints) / sizeof(codepoints[0]));
             HTSet(fontMap, name, f);
-        }
+        } else if (TextIsEqual(ext,".locale")) {
+			// TODO: NOT IMPLEMENTED
+		}
     }
     TraceLog(LOG_INFO, "RESMAN: Loaded %d images", imageMap->count);
     TraceLog(LOG_INFO, "RESMAN: Loaded %d textures", textureMap->count);
@@ -154,3 +156,46 @@ const char **ResManGetImageKeys(i32 *count) {
     return HTGetKeys(imageMap, count);
 }
 const char **ResManGetFontKeys(i32 *count) { return HTGetKeys(fontMap, count); }
+
+bool ResManGetResource(const char *key, ResourceType type, void *out) {
+    switch (type) {
+    case RES_SOUND: {
+        return ResManGetSound(key, out);
+    } break;
+    case RES_IMAGE: {
+        return ResManGetImage(key, out);
+    } break;
+    case RES_TEXTURE: {
+        return ResManGetTexture(key, out);
+    } break;
+    case RES_FONT: {
+        return ResManGetFont(key, out);
+    } break;
+    case RES_SHADER: {
+        return ResManGetShader(key, out);
+    } break;
+    default:
+        return false;
+    }
+}
+const char **ResManGetKeys(ResourceType type, i32 *count) {
+    switch (type) {
+    case RES_SOUND: {
+        return ResManGetSoundKeys(count);
+    } break;
+    case RES_IMAGE: {
+        return ResManGetSoundKeys(count);
+    } break;
+    case RES_TEXTURE: {
+        return ResManGetSoundKeys(count);
+    } break;
+    case RES_FONT: {
+        return ResManGetSoundKeys(count);
+    } break;
+    case RES_SHADER: {
+        return ResManGetSoundKeys(count);
+    } break;
+    default:
+        return nullptr;
+    }
+}

@@ -14,7 +14,7 @@ void _msc_unload(AppState *s) { MainMenuState *self = (MainMenuState *)s; }
 void _msc_draw(AppState *s) {
     MainMenuState *self = (MainMenuState *)s;
     Font f;
-    bool res = ResManGetFont("departure", &f);
+    bool res = ResManGetResource("departure", RES_FONT, &f);
     if (res)
         DrawTextEx(f, "hello, мир!", Vector2Zero(), 60, 1, WHITE);
 }
