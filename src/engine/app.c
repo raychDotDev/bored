@@ -52,7 +52,7 @@ void AppDraw() {
     AppStateDraw(self.screen);
     EndDrawing();
 }
-void AppUpdate() { AppStateUpdate(self.screen); }
+void AppUpdate() { AppStateUpdate(self.screen, GetFrameTime()); }
 void AppSetState(AppState *state) {
     AppStateUnload(self.screen);
     if (self.screen)

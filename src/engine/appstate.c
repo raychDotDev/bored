@@ -1,4 +1,5 @@
 #include "appstate.h"
+#include "types.h"
 #include <raylib.h>
 
 AppState AppStateBase() {
@@ -28,11 +29,11 @@ void AppStateDraw(AppState *self) {
     }
     self->on_draw(self);
 }
-void AppStateUpdate(AppState *self) {
+void AppStateUpdate(AppState *self, f32 dt) {
     if (!self || !self->on_update) {
         return;
     }
-    self->on_update(self);
+    self->on_update(self, dt);
 }
 
 void AppStateDispose(AppState *self) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "game/entitylist.h"
+#include "entitylist.h"
 #include "types.h"
 typedef struct World {
     EntityList *entities;
