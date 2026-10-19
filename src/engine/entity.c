@@ -8,6 +8,7 @@ Entity EntityEmpty(Vector2 pos, f32 rad) {
     self.rad = rad;
     self.vel = Vector2Zero();
     self.update = nullptr;
+	self.collision = Vector2Zero();
     return self;
 }
 

@@ -2,14 +2,31 @@
 #include "engine/app.h"
 #include "engine/appstate.h"
 #include "engine/entity.h"
+#include "engine/mathutils.h"
 #include "engine/resman.h"
 #include "engine/world.h"
 #include "engine/worldrenderer.h"
 #include <raylib.h>
 #include <raymath.h>
 
+void PlayerUpdate(Entity *self, World *ctx, f32 dt) {
+    i32 hor = IsKeyDown(KEY_D) - IsKeyDown(KEY_A);
+    f32 speed = 20;
+
+    if (hor != 0) {
+        self->vel.x = speed * hor;
+    } else {
+        self->vel.x = FILerp(self->vel.x, 0.f, 0.01f, dt);
+    }
+
+    if (IsKeyPressed(KEY_SPACE)) {
+        self->vel.y = -speed * 2;
+    }
+}
+
 typedef struct _mmst {
     AppState base;
+    Entity *player;
     World *world;
     WorldRenderer renderer;
 } MainMenuState;
@@ -17,13 +34,14 @@ typedef struct _mmst {
 void _msc_load(AppState *s) {
     MainMenuState *self = (MainMenuState *)s;
     self->world = WorldCreate((Vector2){40, 22});
-	self->world->gravity = (Vector2){0.f, 10.f};
+    self->world->gravity = (Vector2){0.f, 90.f};
     self->renderer = WorldRendererCreate(
         (Vector2){self->world->size.x / 2, self->world->size.y / 2});
-	self->renderer.step = 0.01f;
-	Entity* e = MemAlloc(sizeof(Entity));
-	*e = EntityEmpty(Vector2Scale(self->world->size, 0.5f), 1.f);
-	WorldEntityPush(self->world, e);
+    self->renderer.step = 0.01f;
+    self->player = MemAlloc(sizeof(Entity));
+    *self->player = EntityEmpty(Vector2Scale(self->world->size, 0.5f), 1.f);
+    self->player->update = PlayerUpdate;
+    WorldEntityPush(self->world, self->player);
 }
 
 void _msc_unload(AppState *s) {
@@ -33,17 +51,11 @@ void _msc_unload(AppState *s) {
 
 void _msc_draw(AppState *s) {
     MainMenuState *self = (MainMenuState *)s;
-    Font f;
     WorldRendererRender(&self->renderer, self->world);
-    bool res = ResManGetResource("departure", RES_FONT, &f);
-    if (res)
-        DrawTextEx(f,
-                   ResManGetLocaleString(AppGetLocale(), "startgame", nullptr),
-                   Vector2Zero(), 60, 1, WHITE);
 }
 void _msc_update(AppState *s, f32 dt) {
     MainMenuState *self = (MainMenuState *)s;
-	WorldUpdate(self->world, dt);
+    WorldUpdate(self->world, dt);
     WorldRendererUpdate(&self->renderer, self->world, dt);
     if (IsKeyPressed(KEY_EQUAL)) {
         self->renderer.zoom += 0.1;
@@ -52,13 +64,14 @@ void _msc_update(AppState *s, f32 dt) {
         self->renderer.zoom -= 0.1;
     }
 
-    i32 x, y;
-    x = IsKeyDown(KEY_D) - IsKeyDown(KEY_A);
-    y = IsKeyDown(KEY_S) - IsKeyDown(KEY_W);
-    Vector2 dir = {x, y};
-    dir = Vector2Normalize(dir);
-    self->renderer.target =
-        Vector2Add(self->renderer.target, Vector2Scale(dir, 100 * dt));
+    // i32 x, y;
+    // x = IsKeyDown(KEY_D) - IsKeyDown(KEY_A);
+    // y = IsKeyDown(KEY_S) - IsKeyDown(KEY_W);
+    // Vector2 dir = {x, y};
+    // dir = Vector2Normalize(dir);
+    // self->renderer.target =
+    //     Vector2Add(self->renderer.target, Vector2Scale(dir, 100 * dt));
+    self->renderer.target = self->player->pos;
 }
 
 AppState *MainMenuState_New(bool started) {

@@ -3,13 +3,12 @@
 #include "entitylist.h"
 #include <raylib.h>
 #include <raymath.h>
-#include <stdio.h>
 
 void WorldUpdate(World *self, f32 dt) {
     Entity *cleanuppool[self->entities->size];
     for (i32 i = 0; i < self->entities->size; i++)
         cleanuppool[i] = nullptr;
-    for (i32 i = 0; i <= self->entities->size; i++) {
+    for (i32 i = 0; i < self->entities->size; i++) {
         Entity *e = self->entities->items[i];
         EntityUpdate(e, self, dt);
         if (!EntityIsAlive(self->entities->items[i])) {
@@ -17,7 +16,32 @@ void WorldUpdate(World *self, f32 dt) {
             continue;
         }
         e->vel = Vector2Add(e->vel, Vector2Scale(self->gravity, dt));
-        e->pos = Vector2Add(e->pos, Vector2Scale(e->vel, dt));
+        Vector2 nextPos = Vector2Add(e->pos, Vector2Scale(e->vel, dt));
+        nextPos = Vector2Clamp(nextPos, Vector2Zero(), self->size);
+        if (nextPos.x < e->rad) {
+            nextPos.x = e->rad;
+            e->vel.x = 0.f;
+            e->collision.x = -1;
+        } else if (nextPos.x > self->size.x - e->rad) {
+            nextPos.x = self->size.x - e->rad;
+            e->vel.x = 0.f;
+            e->collision.x = 1;
+        } else {
+            e->collision.x = 0;
+        }
+
+        if (nextPos.y < e->rad) {
+            nextPos.y = e->rad;
+            e->vel.y = 0.f;
+            e->collision.y = -1;
+        } else if (nextPos.y > self->size.y - e->rad) {
+            nextPos.y = self->size.y - e->rad;
+            e->vel.y = 0.f;
+            e->collision.y = 1;
+        } else {
+            e->collision.y = 0;
+        }
+        e->pos = nextPos;
     }
     for (i32 i = 0; i < self->entities->size && cleanuppool[i] != nullptr;
          i++) {

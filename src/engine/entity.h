@@ -6,7 +6,7 @@
 typedef struct World World;
 typedef struct Entity Entity;
 typedef struct Entity {
-    Vector2 pos, vel;
+    Vector2 pos, vel, collision;
     f32 rad;
     void (*update)(Entity *self, World *ctx, f32 dt);
     bool (*isAlive)(Entity *self);

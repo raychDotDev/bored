@@ -62,7 +62,7 @@ void WorldRendererRender(WorldRenderer *self, World *ctx) {
     Font f = GetFontDefault();
     const char *text = TextFormat("%.2f", ctx->time);
     f32 fsize = ctx->size.y / 3;
-	f32 fspacing = fsize * 0.03;
+    f32 fspacing = fsize * 0.03;
     Vector2 size = MeasureTextEx(f, text, fsize, fspacing);
     DrawTextPro(f, text,
                 (Vector2){
@@ -73,8 +73,8 @@ void WorldRendererRender(WorldRenderer *self, World *ctx) {
     for (i32 i = 0; i < ctx->entities->size; i++) {
         Entity *e = ctx->entities->items[i];
         DrawCircleV(e->pos, e->rad, c);
+        DrawTextPro(f, TextFormat("%.2f, %.2f", e->collision.x, e->collision.y),
+                 e->pos, Vector2Zero(), 0.f, fsize * 0.2f, fspacing, GREEN);
     }
     EndMode2D();
-    DrawText(TextFormat("%.2f\n%.2f", self->camera.zoom, self->zoom), 10, 10,
-             20, RED);
 }
