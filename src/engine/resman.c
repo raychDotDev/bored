@@ -39,8 +39,9 @@ void _rmLoad() {
             i32 codepoints[0x0500];
             for (i32 i = 0; i < 0x0500; i++)
                 codepoints[i] = i;
-            *f = LoadFontEx(path, 60, codepoints,
+            *f = LoadFontEx(path, 240, codepoints,
                             sizeof(codepoints) / sizeof(codepoints[0]));
+			SetTextureFilter(f->texture, TEXTURE_FILTER_POINT);
             HTSet(fontMap, name, f);
         } else if (TextIsEqual(ext, ".locale")) {
             HashTable *table = HTCreate();

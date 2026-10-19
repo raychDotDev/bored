@@ -5,6 +5,8 @@
 typedef struct World {
     EntityList *entities;
     Vector2 size;
+	Vector2 gravity;
+	f32 time;
 } World;
 
 World *WorldCreate(Vector2 size);

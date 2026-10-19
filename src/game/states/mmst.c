@@ -1,12 +1,12 @@
 #include "game/states/mmst.h"
 #include "engine/app.h"
 #include "engine/appstate.h"
+#include "engine/entity.h"
 #include "engine/resman.h"
 #include "engine/world.h"
 #include "engine/worldrenderer.h"
 #include <raylib.h>
 #include <raymath.h>
-#include <stdio.h>
 
 typedef struct _mmst {
     AppState base;
@@ -16,10 +16,14 @@ typedef struct _mmst {
 
 void _msc_load(AppState *s) {
     MainMenuState *self = (MainMenuState *)s;
-    self->world = WorldCreate((Vector2){100, 60});
+    self->world = WorldCreate((Vector2){40, 22});
+	self->world->gravity = (Vector2){0.f, 10.f};
     self->renderer = WorldRendererCreate(
         (Vector2){self->world->size.x / 2, self->world->size.y / 2});
 	self->renderer.step = 0.01f;
+	Entity* e = MemAlloc(sizeof(Entity));
+	*e = EntityEmpty(Vector2Scale(self->world->size, 0.5f), 1.f);
+	WorldEntityPush(self->world, e);
 }
 
 void _msc_unload(AppState *s) {
@@ -36,10 +40,10 @@ void _msc_draw(AppState *s) {
         DrawTextEx(f,
                    ResManGetLocaleString(AppGetLocale(), "startgame", nullptr),
                    Vector2Zero(), 60, 1, WHITE);
-    printf("%.2f\n", self->renderer.zoom);
 }
 void _msc_update(AppState *s, f32 dt) {
     MainMenuState *self = (MainMenuState *)s;
+	WorldUpdate(self->world, dt);
     WorldRendererUpdate(&self->renderer, self->world, dt);
     if (IsKeyPressed(KEY_EQUAL)) {
         self->renderer.zoom += 0.1;
