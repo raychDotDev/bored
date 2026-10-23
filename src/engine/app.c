@@ -3,18 +3,32 @@
 #include "resman.h"
 #include "types.h"
 #include <raylib.h>
+#include <raymath.h>
 
 const v2i INIT_WINDOW_SIZE = (v2i){720, 480};
 
 typedef struct _gs {
     AppState *screen;
     bool running;
+    RenderTexture canvas;
+    i32 windowPrevWidth;
+    i32 windowPrevHeight;
     const char *localeKey;
 } App;
 
-App self;
+static App __AppInstance;
 
-const char *AppGetLocale() { return self.localeKey; }
+void AppReloadCanvas() {
+    if (IsRenderTextureValid(__AppInstance.canvas)) {
+        UnloadRenderTexture(__AppInstance.canvas);
+    }
+    i32 ww, wh;
+    ww = GetScreenWidth();
+    wh = GetScreenHeight();
+    __AppInstance.canvas = LoadRenderTexture(ww, wh);
+}
+
+const char *AppGetLocale() { return __AppInstance.localeKey; }
 void AppSetLocale(const char *key) {
     if (key == nullptr)
         return;
@@ -28,13 +42,13 @@ void AppSetLocale(const char *key) {
         }
     }
     if (!found) {
-        self.localeKey = available[0];
+        __AppInstance.localeKey = available[0];
         return;
     }
-    self.localeKey = key;
+    __AppInstance.localeKey = key;
 }
 void AppInit() {
-    self = (App){.screen = nullptr, .running = true};
+    __AppInstance = (App){.screen = nullptr, .running = true};
     InitAudioDevice();
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     SetConfigFlags(FLAG_VSYNC_HINT);
@@ -44,27 +58,58 @@ void AppInit() {
     SetWindowTitle(TextFormat(
         "%s v.%s", ResManGetLocaleString(AppGetLocale(), "title", nullptr),
         GAME_VERSION));
+    __AppInstance.windowPrevWidth = INIT_WINDOW_SIZE.x;
+    __AppInstance.windowPrevHeight = INIT_WINDOW_SIZE.y;
+    AppReloadCanvas();
 }
+
 void AppDispose();
 void AppDraw() {
+    BeginTextureMode(__AppInstance.canvas);
+    ClearBackground(BLACK);
+    AppStateDraw(__AppInstance.screen);
+    EndTextureMode();
+
+    i32 ww, wh;
+    ww = GetScreenWidth();
+    wh = GetScreenHeight();
+    if (ww != __AppInstance.windowPrevWidth ||
+        wh != __AppInstance.windowPrevHeight) {
+        AppReloadCanvas();
+        __AppInstance.windowPrevWidth = ww;
+        __AppInstance.windowPrevHeight = wh;
+    }
     BeginDrawing();
     ClearBackground(BLACK);
-    AppStateDraw(self.screen);
+    DrawTexturePro(__AppInstance.canvas.texture,
+                   (Rectangle){
+                       0,
+                       0,
+                       __AppInstance.canvas.texture.width,
+                       -__AppInstance.canvas.texture.height,
+                   },
+                   (Rectangle){
+                       0,
+                       0,
+                       __AppInstance.canvas.texture.width,
+                       __AppInstance.canvas.texture.height,
+                   },
+                   Vector2Zero(), 0.f, WHITE);
     EndDrawing();
 }
-void AppUpdate() { AppStateUpdate(self.screen, GetFrameTime()); }
+void AppUpdate() { AppStateUpdate(__AppInstance.screen, GetFrameTime()); }
 void AppSetState(AppState *state) {
-    AppStateUnload(self.screen);
-    if (self.screen)
-        AppStateDispose(self.screen);
-    self.screen = state;
+    AppStateUnload(__AppInstance.screen);
+    if (__AppInstance.screen)
+        AppStateDispose(__AppInstance.screen);
+    __AppInstance.screen = state;
     AppStateLoad(state);
 }
 void AppRun() {
-    if (!self.running) {
+    if (!__AppInstance.running) {
         return;
     }
-    while (self.running && !WindowShouldClose()) {
+    while (__AppInstance.running && !WindowShouldClose()) {
         AppUpdate();
         AppDraw();
     }
@@ -75,6 +120,7 @@ void AppStop();
 void AppDispose() {
     AppSetState(nullptr);
     ResManDispose();
+    UnloadRenderTexture(__AppInstance.canvas);
     CloseWindow();
     CloseAudioDevice();
 }

@@ -2,10 +2,8 @@
 #include "engine/entity.h"
 #include "engine/entitylist.h"
 #include "engine/mathutils.h"
-#include "engine/resman.h"
 #include <raylib.h>
 #include <raymath.h>
-#include <stdio.h>
 
 void WorldRendererUpdateCameraBounds(WorldRenderer *self, World *ctx) {
     i32 ww, wh;
@@ -60,7 +58,7 @@ void WorldRendererRender(WorldRenderer *self, World *ctx) {
     DrawRectangleRec(bgp, b);
 
     Font f = GetFontDefault();
-    const char *text = TextFormat("%.2f", ctx->time);
+    const char *text = TextFormat("%.1f", ctx->time);
     f32 fsize = ctx->size.y / 3;
     f32 fspacing = fsize * 0.03;
     Vector2 size = MeasureTextEx(f, text, fsize, fspacing);
@@ -73,8 +71,9 @@ void WorldRendererRender(WorldRenderer *self, World *ctx) {
     for (i32 i = 0; i < ctx->entities->size; i++) {
         Entity *e = ctx->entities->items[i];
         DrawCircleV(e->pos, e->rad, c);
+		f32 scale = 0.1f;
         DrawTextPro(f, TextFormat("%.2f, %.2f", e->collision.x, e->collision.y),
-                 e->pos, Vector2Zero(), 0.f, fsize * 0.2f, fspacing, GREEN);
+                    e->pos, Vector2Zero(), 0.f, fsize * scale, fspacing * scale, GREEN);
     }
     EndMode2D();
 }

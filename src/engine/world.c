@@ -47,6 +47,7 @@ void WorldUpdate(World *self, f32 dt) {
          i++) {
         EntityListRemove(self->entities, cleanuppool[i]);
     }
+    self->time += dt;
 }
 
 World *WorldCreate(Vector2 size) {
