@@ -6,15 +6,16 @@
 typedef struct World World;
 typedef struct Entity Entity;
 typedef struct Entity {
-    Vector2 pos, vel, collision;
-    f32 rad;
+	u32 flag;
     void (*update)(Entity *self, World *ctx, f32 dt);
     void (*draw)(Entity *self, World *ctx);
     bool (*isAlive)(Entity *self);
+    Vector2 pos, vel, collision;
+    f32 rad;
 } Entity;
 
 Entity EntityEmpty(Vector2 pos, f32 rad);
 void EntityUpdate(Entity *self, World *ctx, f32 dt);
 void EntityDraw(Entity *self, World *ctx);
 bool EntityIsAlive(Entity *self);
-void EntityDestroy(Entity* self);
+void EntityDestroy(Entity *self);

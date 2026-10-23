@@ -4,6 +4,7 @@
 
 Entity EntityEmpty(Vector2 pos, f32 rad) {
     Entity self = {};
+	self.flag = 0;
     self.pos = pos;
     self.rad = rad;
     self.vel = Vector2Zero();
