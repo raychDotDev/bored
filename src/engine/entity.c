@@ -8,7 +8,8 @@ Entity EntityEmpty(Vector2 pos, f32 rad) {
     self.rad = rad;
     self.vel = Vector2Zero();
     self.update = nullptr;
-	self.collision = Vector2Zero();
+    self.draw = nullptr;
+    self.collision = Vector2Zero();
     return self;
 }
 
@@ -30,4 +31,14 @@ void EntityDestroy(Entity *self) {
     if (!self)
         return;
     MemFree(self);
+}
+
+void EntityDraw(Entity *self, World *ctx) {
+    if (!self || !ctx)
+        return;
+    if (self->draw) {
+        self->draw(self, ctx);
+    } else {
+        DrawCircleV(self->pos, self->rad, RED);
+    }
 }

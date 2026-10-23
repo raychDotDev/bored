@@ -35,19 +35,19 @@ void WorldRendererUpdate(WorldRenderer *self, World *ctx, f32 dt) {
 void WorldRendererRender(WorldRenderer *self, World *ctx) {
     if (!self || !ctx)
         return;
-    Color a = BLACK, b = {255, 243, 243, 255}, c = {200, 0, 0, 255};
+    Color a = BLACK, b = {255, 243, 243, 255};
     Color x = ColorLerp(b, BLACK, 0.3f);
     BeginMode2D(self->camera);
     ClearBackground(a);
     Rectangle field = {0, 0, ctx->size.x, ctx->size.y};
     Rectangle fgp = field;
     Rectangle bgp = field;
-    f32 fgz = 0.82;
+    f32 fgz = 0.87;
     fgp.x = (fgp.x - self->camera.target.x) / fgz + self->camera.target.x;
     fgp.y = (fgp.y - self->camera.target.y) / fgz + self->camera.target.y;
     fgp.width /= fgz;
     fgp.height /= fgz;
-    f32 z = 1.5f;
+    f32 z = 1.2f;
     bgp.x = (bgp.x - self->camera.target.x) / z + self->camera.target.x;
     bgp.y = (bgp.y - self->camera.target.y) / z + self->camera.target.y;
     bgp.width /= z;
@@ -70,10 +70,7 @@ void WorldRendererRender(WorldRenderer *self, World *ctx) {
                 Vector2Zero(), 0.f, fsize, fspacing, x);
     for (i32 i = 0; i < ctx->entities->size; i++) {
         Entity *e = ctx->entities->items[i];
-        DrawCircleV(e->pos, e->rad, c);
-		f32 scale = 0.1f;
-        DrawTextPro(f, TextFormat("%.2f, %.2f", e->collision.x, e->collision.y),
-                    e->pos, Vector2Zero(), 0.f, fsize * scale, fspacing * scale, GREEN);
+        EntityDraw(e, ctx);
     }
     EndMode2D();
 }

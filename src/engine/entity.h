@@ -9,10 +9,12 @@ typedef struct Entity {
     Vector2 pos, vel, collision;
     f32 rad;
     void (*update)(Entity *self, World *ctx, f32 dt);
+    void (*draw)(Entity *self, World *ctx);
     bool (*isAlive)(Entity *self);
 } Entity;
 
 Entity EntityEmpty(Vector2 pos, f32 rad);
 void EntityUpdate(Entity *self, World *ctx, f32 dt);
+void EntityDraw(Entity *self, World *ctx);
 bool EntityIsAlive(Entity *self);
 void EntityDestroy(Entity* self);
