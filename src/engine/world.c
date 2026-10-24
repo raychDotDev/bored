@@ -1,6 +1,7 @@
 #include "world.h"
 #include "entity.h"
 #include "entitylist.h"
+#include <math.h>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -15,7 +16,10 @@ void WorldUpdate(World *self, f32 dt) {
             cleanuppool[i] = e;
             continue;
         }
-        e->vel = Vector2Add(e->vel, Vector2Scale(self->gravity, dt));
+        e->vel = Vector2Add(
+            e->vel,
+            Vector2Scale(Vector2Multiply(self->gravity, e->gravityModifier),
+                         dt));
         Vector2 nextPos = Vector2Add(e->pos, Vector2Scale(e->vel, dt));
         nextPos = Vector2Clamp(nextPos, Vector2Zero(), self->size);
         if (nextPos.x < e->rad) {
@@ -42,6 +46,70 @@ void WorldUpdate(World *self, f32 dt) {
             e->collision.y = 0;
         }
         e->pos = nextPos;
+        for (i32 k = 0; k < self->entities->size; k++) {
+            Entity *o = self->entities->items[k];
+            if (e == o) {
+                continue;
+            }
+            f32 dist = Vector2Distance(e->pos, o->pos);
+            f32 radsum = e->rad + o->rad;
+            if (dist > radsum) {
+                continue;
+            }
+            if (e->collisionFlag == ENTITY_COLLISION_NONE ||
+                o->collisionFlag == ENTITY_COLLISION_NONE) {
+                continue;
+            }
+
+            Vector2 normalO = Vector2Normalize(Vector2Subtract(o->pos, e->pos));
+            Vector2 normalE = Vector2Normalize(Vector2Subtract(e->pos, o->pos));
+
+            // if (e->collision.x != 0) {
+            //     normalE.x = 0;
+            // }
+            // if (e->collision.y != 0) {
+            //     normalE.y = 0;
+            // }
+            // if (o->collision.x != 0) {
+            //     normalO.x = 0;
+            // }
+            // if (o->collision.y != 0) {
+            //     normalO.y = 0;
+            // }
+            if (e->collisionFlag > 1 && o->collisionFlag > 1) {
+                f32 overlap = radsum - dist;
+
+                e->pos =
+                    Vector2Add(e->pos, Vector2Scale(normalE, overlap * 0.5));
+                o->pos =
+                    Vector2Add(o->pos, Vector2Scale(normalO, overlap * 0.5));
+                // f32 forceE = Vector2Length(e->vel);
+                // f32 forceO = Vector2Length(o->vel);
+                f32 forceE = (Vector2Length(o->vel)) * (o->rad / e->rad);
+                f32 forceO = (Vector2Length(e->vel)) * (e->rad / o->rad);
+                // normalE = Vector2Normalize(normalE); normalO =
+                // Vector2Normalize(normalO);
+
+                Vector2 normalPerpE = Vector2Rotate(normalE, PI / 2.f);
+                f32 angleBetweenE =
+                    Vector2Angle(normalPerpE, Vector2Normalize(e->vel));
+
+                // e->vel =Vector2Subtract()
+                //     Vector2Scale(normalPerpE, cosf(angleBetweenE) * forceE);
+                e->vel = Vector2Scale(normalE, forceE);
+
+                Vector2 normalPerpO = Vector2Rotate(normalO, PI / 2.f);
+                f32 angleBetweenO =
+                    Vector2Angle(normalPerpO, Vector2Normalize(o->vel));
+
+                o->vel = Vector2Scale(normalO, forceO);
+                // o->vel =
+                //     Vector2Scale(normalPerpO, cosf(angleBetweenO) * forceO);
+            }
+
+            EntityCollide(e, o, normalO);
+            EntityCollide(o, e, normalE);
+        }
     }
     for (i32 i = 0; i < self->entities->size && cleanuppool[i] != nullptr;
          i++) {

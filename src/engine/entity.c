@@ -4,14 +4,29 @@
 
 Entity EntityEmpty(Vector2 pos, f32 rad) {
     Entity self = {};
-	self.flag = 0;
+    self.flag = 0;
+    self.collisionFlag = ENTITY_COLLISION_NONE;
+    self.collide = nullptr;
     self.pos = pos;
     self.rad = rad;
     self.vel = Vector2Zero();
+	self.gravityModifier = Vector2One();
     self.update = nullptr;
     self.draw = nullptr;
     self.collision = Vector2Zero();
     return self;
+}
+
+void EntityCollide(Entity *self, Entity *other, Vector2 normal) {
+    if (!self || !other)
+        return;
+    if (self->collisionFlag == ENTITY_COLLISION_NONE ||
+        other->collisionFlag == ENTITY_COLLISION_NONE) {
+        return;
+    }
+    if (self->collide) {
+        self->collide(self, other, normal);
+    }
 }
 
 void EntityUpdate(Entity *self, World *ctx, f32 dt) {

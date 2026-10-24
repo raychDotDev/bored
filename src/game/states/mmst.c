@@ -3,7 +3,6 @@
 #include "engine/appstate.h"
 #include "engine/entity.h"
 #include "engine/mathutils.h"
-#include "engine/resman.h"
 #include "engine/world.h"
 #include "engine/worldrenderer.h"
 #include <raylib.h>
@@ -31,6 +30,12 @@ typedef struct _mmst {
     WorldRenderer renderer;
 } MainMenuState;
 
+void _e_other_update(Entity *self, World *ctx, f32 dt) {
+    self->vel = Vector2Add(
+        self->vel, Vector2Scale(Vector2Normalize(Vector2Subtract(
+                                    ctx->entities->items[0]->pos, self->pos)),
+                                10 * dt));
+}
 void _msc_load(AppState *s) {
     MainMenuState *self = (MainMenuState *)s;
     self->world = WorldCreate((Vector2){40, 22});
@@ -41,7 +46,23 @@ void _msc_load(AppState *s) {
     self->player = MemAlloc(sizeof(Entity));
     *self->player = EntityEmpty(Vector2Scale(self->world->size, 0.5f), 1.f);
     self->player->update = PlayerUpdate;
+    self->player->collisionFlag = ENTITY_COLLISION_SOLID;
+
+    Entity *other = MemAlloc(sizeof(Entity));
+    *other = EntityEmpty(
+        (Vector2){self->player->pos.x, self->player->pos.y - 4.f}, 2.f);
+	other->gravityModifier = Vector2Zero();
+    other->collisionFlag = ENTITY_COLLISION_DYNAMIC;
+	other->update = _e_other_update;
+    Entity *other2 = MemAlloc(sizeof(Entity));
+    *other2 = EntityEmpty(
+        (Vector2){self->player->pos.x, self->player->pos.y + 4.f}, 2.f);
+	other2->gravityModifier = Vector2Zero();
+    other2->collisionFlag = ENTITY_COLLISION_DYNAMIC;
+	other2->update = _e_other_update;
     WorldEntityPush(self->world, self->player);
+    WorldEntityPush(self->world, other);
+    // WorldEntityPush(self->world, other2);
 }
 
 void _msc_unload(AppState *s) {

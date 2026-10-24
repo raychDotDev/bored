@@ -4,4 +4,5 @@
 
 typedef struct LivingEntity {
     Entity base;
+	const char* name;
 } LivingEntity;
