@@ -71,6 +71,10 @@ void WorldRendererRender(WorldRenderer *self, World *ctx) {
     for (i32 i = 0; i < ctx->entities->size; i++) {
         Entity *e = ctx->entities->items[i];
         EntityDraw(e, ctx);
+        DrawLineV(
+            e->pos,
+            Vector2Add(e->pos, Vector2Scale(Vector2Normalize(e->vel), e->rad)),
+            GREEN);
     }
     EndMode2D();
 }

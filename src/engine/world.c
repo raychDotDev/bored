@@ -79,32 +79,28 @@ void WorldUpdate(World *self, f32 dt) {
             if (e->collisionFlag > 1 && o->collisionFlag > 1) {
                 f32 overlap = radsum - dist;
 
-                e->pos =
-                    Vector2Add(e->pos, Vector2Scale(normalE, overlap * 0.5));
-                o->pos =
-                    Vector2Add(o->pos, Vector2Scale(normalO, overlap * 0.5));
-                // f32 forceE = Vector2Length(e->vel);
-                // f32 forceO = Vector2Length(o->vel);
-                f32 forceE = (Vector2Length(o->vel)) * (o->rad / e->rad);
-                f32 forceO = (Vector2Length(e->vel)) * (e->rad / o->rad);
+                e->pos = Vector2Add(
+                    e->pos, Vector2Scale(normalE, overlap / 2.f + EPSILON));
+                o->pos = Vector2Add(
+                    o->pos, Vector2Scale(normalO, overlap / 2.f + EPSILON));
+                f32 forceE = Vector2Length(e->vel);
+                f32 forceO = Vector2Length(o->vel);
+                // f32 forceE = (Vector2Length(o->vel)) * (o->rad / e->rad);
+                // f32 forceO = (Vector2Length(e->vel)) * (e->rad / o->rad);
                 // normalE = Vector2Normalize(normalE); normalO =
                 // Vector2Normalize(normalO);
 
-                Vector2 normalPerpE = Vector2Rotate(normalE, PI / 2.f);
+                Vector2 normalPerpE = Vector2Normalize(Vector2Rotate(normalE, PI / 2.f));
                 f32 angleBetweenE =
                     Vector2Angle(normalPerpE, Vector2Normalize(e->vel));
+                e->vel =
+                    Vector2Scale(normalPerpE, cosf(angleBetweenE) * forceE);
 
-                // e->vel =Vector2Subtract()
-                //     Vector2Scale(normalPerpE, cosf(angleBetweenE) * forceE);
-                e->vel = Vector2Scale(normalE, forceE);
-
-                Vector2 normalPerpO = Vector2Rotate(normalO, PI / 2.f);
+                Vector2 normalPerpO = Vector2Normalize(Vector2Rotate(normalO, PI / 2.f));
                 f32 angleBetweenO =
                     Vector2Angle(normalPerpO, Vector2Normalize(o->vel));
-
-                o->vel = Vector2Scale(normalO, forceO);
-                // o->vel =
-                //     Vector2Scale(normalPerpO, cosf(angleBetweenO) * forceO);
+                o->vel =
+                    Vector2Scale(normalPerpO, cosf(angleBetweenO) * forceO);
             }
 
             EntityCollide(e, o, normalO);

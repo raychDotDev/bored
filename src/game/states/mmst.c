@@ -34,7 +34,7 @@ void _e_other_update(Entity *self, World *ctx, f32 dt) {
     self->vel = Vector2Add(
         self->vel, Vector2Scale(Vector2Normalize(Vector2Subtract(
                                     ctx->entities->items[0]->pos, self->pos)),
-                                10 * dt));
+                                50 * dt));
 }
 void _msc_load(AppState *s) {
     MainMenuState *self = (MainMenuState *)s;
@@ -62,7 +62,7 @@ void _msc_load(AppState *s) {
 	other2->update = _e_other_update;
     WorldEntityPush(self->world, self->player);
     WorldEntityPush(self->world, other);
-    // WorldEntityPush(self->world, other2);
+    WorldEntityPush(self->world, other2);
 }
 
 void _msc_unload(AppState *s) {
