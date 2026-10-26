@@ -21,7 +21,7 @@ typedef struct Entity {
     bool (*isAlive)(Entity *self);
     void (*collide)(Entity *self, Entity *other, Vector2 normal);
     Vector2 pos, vel, collision, gravityModifier;
-    f32 rad;
+    f32 rad, weight;
 } Entity;
 
 Entity EntityEmpty(Vector2 pos, f32 rad);

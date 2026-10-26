@@ -7,6 +7,7 @@
 #include "engine/worldrenderer.h"
 #include <raylib.h>
 #include <raymath.h>
+#include <stdio.h>
 
 void PlayerUpdate(Entity *self, World *ctx, f32 dt) {
     i32 hor = IsKeyDown(KEY_D) - IsKeyDown(KEY_A);
@@ -34,7 +35,7 @@ void _e_other_update(Entity *self, World *ctx, f32 dt) {
     self->vel = Vector2Add(
         self->vel, Vector2Scale(Vector2Normalize(Vector2Subtract(
                                     ctx->entities->items[0]->pos, self->pos)),
-                                50 * dt));
+                                10 * dt));
 }
 void _msc_load(AppState *s) {
     MainMenuState *self = (MainMenuState *)s;
@@ -48,18 +49,21 @@ void _msc_load(AppState *s) {
     self->player->update = PlayerUpdate;
     self->player->collisionFlag = ENTITY_COLLISION_SOLID;
 
+	Vector2 grav = {0.9f, 0.9f};
     Entity *other = MemAlloc(sizeof(Entity));
     *other = EntityEmpty(
         (Vector2){self->player->pos.x, self->player->pos.y - 4.f}, 2.f);
-	other->gravityModifier = Vector2Zero();
+    other->gravityModifier = grav;
     other->collisionFlag = ENTITY_COLLISION_DYNAMIC;
-	other->update = _e_other_update;
+    other->update = _e_other_update;
+	other->weight = 10.f;
     Entity *other2 = MemAlloc(sizeof(Entity));
     *other2 = EntityEmpty(
         (Vector2){self->player->pos.x, self->player->pos.y + 4.f}, 2.f);
-	other2->gravityModifier = Vector2Zero();
+    other2->gravityModifier = grav;
     other2->collisionFlag = ENTITY_COLLISION_DYNAMIC;
-	other2->update = _e_other_update;
+    other2->update = _e_other_update;
+	other2->weight = 10.f;
     WorldEntityPush(self->world, self->player);
     WorldEntityPush(self->world, other);
     WorldEntityPush(self->world, other2);
@@ -78,13 +82,20 @@ void _msc_update(AppState *s, f32 dt) {
     MainMenuState *self = (MainMenuState *)s;
     WorldUpdate(self->world, dt);
     WorldRendererUpdate(&self->renderer, self->world, dt);
+    for (i32 i = 0; i < self->world->entities->size; i++) {
+        printf("%d: cx: %.2f, cy: %.2f\n", i,
+               self->world->entities->items[i]->collision.x,
+               self->world->entities->items[i]->collision.y);
+        printf("%d: vx: %.2f, vy: %.2f\n", i,
+               self->world->entities->items[i]->vel.x,
+               self->world->entities->items[i]->vel.y);
+    }
     if (IsKeyPressed(KEY_EQUAL)) {
         self->renderer.zoom += 0.1;
     }
     if (IsKeyPressed(KEY_MINUS)) {
         self->renderer.zoom -= 0.1;
     }
-
     // i32 x, y;
     // x = IsKeyDown(KEY_D) - IsKeyDown(KEY_A);
     // y = IsKeyDown(KEY_S) - IsKeyDown(KEY_W);

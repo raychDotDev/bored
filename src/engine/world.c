@@ -4,107 +4,127 @@
 #include <math.h>
 #include <raylib.h>
 #include <raymath.h>
+#include <stdio.h>
+typedef struct worldcollisionpair {
+    i32 indexA, indexB;
+} worldcollisionpair;
 
 void WorldUpdate(World *self, f32 dt) {
     Entity *cleanuppool[self->entities->size];
     for (i32 i = 0; i < self->entities->size; i++)
         cleanuppool[i] = nullptr;
+    worldcollisionpair
+        collisionsChecked[self->entities->size * self->entities->size];
+    i32 wcpi = 0;
+
     for (i32 i = 0; i < self->entities->size; i++) {
-        Entity *e = self->entities->items[i];
-        EntityUpdate(e, self, dt);
+        Entity *a = self->entities->items[i];
+        EntityUpdate(a, self, dt);
         if (!EntityIsAlive(self->entities->items[i])) {
-            cleanuppool[i] = e;
+            cleanuppool[i] = a;
             continue;
         }
-        e->vel = Vector2Add(
-            e->vel,
-            Vector2Scale(Vector2Multiply(self->gravity, e->gravityModifier),
+        a->vel = Vector2Add(
+            a->vel,
+            Vector2Scale(Vector2Multiply(self->gravity, a->gravityModifier),
                          dt));
-        Vector2 nextPos = Vector2Add(e->pos, Vector2Scale(e->vel, dt));
+        Vector2 nextPos = Vector2Add(a->pos, Vector2Scale(a->vel, dt));
         nextPos = Vector2Clamp(nextPos, Vector2Zero(), self->size);
-        if (nextPos.x < e->rad) {
-            nextPos.x = e->rad;
-            e->vel.x = 0.f;
-            e->collision.x = -1;
-        } else if (nextPos.x > self->size.x - e->rad) {
-            nextPos.x = self->size.x - e->rad;
-            e->vel.x = 0.f;
-            e->collision.x = 1;
+        if (nextPos.x < a->rad) {
+            nextPos.x = a->rad;
+            a->vel.x = 0.f;
+            a->collision.x = -1;
+        } else if (nextPos.x > self->size.x - a->rad) {
+            nextPos.x = self->size.x - a->rad;
+            a->vel.x = 0.f;
+            a->collision.x = 1;
         } else {
-            e->collision.x = 0;
+            a->collision.x = 0;
         }
 
-        if (nextPos.y < e->rad) {
-            nextPos.y = e->rad;
-            e->vel.y = 0.f;
-            e->collision.y = -1;
-        } else if (nextPos.y > self->size.y - e->rad) {
-            nextPos.y = self->size.y - e->rad;
-            e->vel.y = 0.f;
-            e->collision.y = 1;
+        if (nextPos.y < a->rad) {
+            nextPos.y = a->rad;
+            a->vel.y = 0.f;
+            a->collision.y = -1;
+        } else if (nextPos.y > self->size.y - a->rad) {
+            nextPos.y = self->size.y - a->rad;
+            a->vel.y = 0.f;
+            a->collision.y = 1;
         } else {
-            e->collision.y = 0;
+            a->collision.y = 0;
         }
-        e->pos = nextPos;
+        a->pos = nextPos;
         for (i32 k = 0; k < self->entities->size; k++) {
-            Entity *o = self->entities->items[k];
-            if (e == o) {
+            Entity *b = self->entities->items[k];
+            if (a == b) {
                 continue;
             }
-            f32 dist = Vector2Distance(e->pos, o->pos);
-            f32 radsum = e->rad + o->rad;
+            bool next = false;
+            for (i32 j = 0;
+                 j < sizeof(collisionsChecked) / sizeof(collisionsChecked[0]);
+                 j++) {
+                worldcollisionpair res = collisionsChecked[j];
+                if ((res.indexA == i && res.indexB == k) ||
+                    (res.indexA == k && res.indexB == i)) {
+                    next = true;
+                    break;
+                }
+            }
+            if (next)
+                continue;
+            f32 dist = Vector2Distance(a->pos, b->pos);
+            f32 radsum = a->rad + b->rad;
             if (dist > radsum) {
                 continue;
             }
-            if (e->collisionFlag == ENTITY_COLLISION_NONE ||
-                o->collisionFlag == ENTITY_COLLISION_NONE) {
+            if (a->collisionFlag == ENTITY_COLLISION_NONE ||
+                b->collisionFlag == ENTITY_COLLISION_NONE) {
                 continue;
             }
 
-            Vector2 normalO = Vector2Normalize(Vector2Subtract(o->pos, e->pos));
-            Vector2 normalE = Vector2Normalize(Vector2Subtract(e->pos, o->pos));
+            Vector2 normalA = Vector2Normalize(Vector2Subtract(a->pos, b->pos));
+            Vector2 normalB = Vector2Normalize(Vector2Subtract(b->pos, a->pos));
+            if (a->collisionFlag > 1 && b->collisionFlag > 1) {
 
-            // if (e->collision.x != 0) {
-            //     normalE.x = 0;
-            // }
-            // if (e->collision.y != 0) {
-            //     normalE.y = 0;
-            // }
-            // if (o->collision.x != 0) {
-            //     normalO.x = 0;
-            // }
-            // if (o->collision.y != 0) {
-            //     normalO.y = 0;
-            // }
-            if (e->collisionFlag > 1 && o->collisionFlag > 1) {
-                f32 overlap = radsum - dist;
-
-                e->pos = Vector2Add(
-                    e->pos, Vector2Scale(normalE, overlap / 2.f + EPSILON));
-                o->pos = Vector2Add(
-                    o->pos, Vector2Scale(normalO, overlap / 2.f + EPSILON));
-                f32 forceE = Vector2Length(e->vel);
-                f32 forceO = Vector2Length(o->vel);
-                // f32 forceE = (Vector2Length(o->vel)) * (o->rad / e->rad);
-                // f32 forceO = (Vector2Length(e->vel)) * (e->rad / o->rad);
+                f32 velModA = Vector2Length(a->vel);
+                f32 velModB = Vector2Length(b->vel);
                 // normalE = Vector2Normalize(normalE); normalO =
                 // Vector2Normalize(normalO);
 
-                Vector2 normalPerpE = Vector2Normalize(Vector2Rotate(normalE, PI / 2.f));
-                f32 angleBetweenE =
-                    Vector2Angle(normalPerpE, Vector2Normalize(e->vel));
-                e->vel =
-                    Vector2Scale(normalPerpE, cosf(angleBetweenE) * forceE);
+                // Vector2 normalPerp =
+                //     Vector2Normalize(Vector2Rotate(normal, PI / 2.f));
+                // f32 angleBetweenE = Vector2Angle(velNormA, velNormB);
+                Vector2 accelB = Vector2Scale(normalB, velModA);
 
-                Vector2 normalPerpO = Vector2Normalize(Vector2Rotate(normalO, PI / 2.f));
-                f32 angleBetweenO =
-                    Vector2Angle(normalPerpO, Vector2Normalize(o->vel));
-                o->vel =
-                    Vector2Scale(normalPerpO, cosf(angleBetweenO) * forceO);
+                b->vel = Vector2Add(b->vel, accelB);
+                b->vel = accelB;
+                if (a->collision.x != 0) {
+                    b->vel.x = 0;
+                }
+                if (a->collision.y != 0) {
+                    b->vel.y = 0;
+                }
+                Vector2 accelA = Vector2Scale(normalA, velModB);
+
+                // a->vel = Vector2Add(a->vel, accelA);
+                a->vel = accelA;
+                if (b->collision.x != 0) {
+                    a->vel.x = 0;
+                }
+                if (b->collision.y != 0) {
+                    a->vel.y = 0;
+                }
             }
+            EntityCollide(a, b, normalA);
 
-            EntityCollide(e, o, normalO);
-            EntityCollide(o, e, normalE);
+            f32 overlap = radsum - dist;
+            a->pos = Vector2Add(a->pos,
+                                Vector2Scale(normalA, overlap / 2.f +
+                                EPSILON));
+            b->pos = Vector2Add(b->pos,
+                                Vector2Scale(normalB, overlap / 2.f +
+                                EPSILON));
+            collisionsChecked[wcpi++] = (worldcollisionpair){i, k};
         }
     }
     for (i32 i = 0; i < self->entities->size && cleanuppool[i] != nullptr;

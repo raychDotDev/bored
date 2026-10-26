@@ -14,6 +14,7 @@ Entity EntityEmpty(Vector2 pos, f32 rad) {
     self.update = nullptr;
     self.draw = nullptr;
     self.collision = Vector2Zero();
+	self.weight = 1.f;
     return self;
 }
 
