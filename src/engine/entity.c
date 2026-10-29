@@ -5,7 +5,6 @@
 Entity EntityEmpty(Vector2 pos, f32 rad) {
     Entity self = {};
     self.flag = 0;
-    self.collisionFlag = ENTITY_COLLISION_NONE;
     self.collide = nullptr;
     self.pos = pos;
     self.rad = rad;
@@ -21,10 +20,6 @@ Entity EntityEmpty(Vector2 pos, f32 rad) {
 void EntityCollide(Entity *self, Entity *other, Vector2 normal) {
     if (!self || !other)
         return;
-    if (self->collisionFlag == ENTITY_COLLISION_NONE ||
-        other->collisionFlag == ENTITY_COLLISION_NONE) {
-        return;
-    }
     if (self->collide) {
         self->collide(self, other, normal);
     }
