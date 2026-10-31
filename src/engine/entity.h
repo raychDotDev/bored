@@ -6,14 +6,21 @@
 typedef struct World World;
 typedef struct Entity Entity;
 
+typedef enum {
+    COLRES_NONE = 0,
+    COLRES_DYNAMIC = 1,
+} EntityCollisionResolveType;
+
 typedef struct Entity {
     u32 flag;
-    void (*update)(Entity *self, World *ctx, f32 dt);
-    void (*draw)(Entity *self, World *ctx);
-    bool (*isAlive)(Entity *self);
-    void (*collide)(Entity *self, Entity *other, Vector2 normal);
-    Vector2 pos, vel, collision, gravityModifier;
-    f32 rad, weight;
+    EntityCollisionResolveType collisionResolveType;
+    void (*on_update)(Entity *self, World *ctx, f32 dt);
+    void (*on_draw)(Entity *self, World *ctx);
+    bool (*is_alive)(Entity *self);
+    void (*on_collide)(Entity *self, Entity *other, Vector2 normal);
+    Vector2 position, velocity, collisionNormal, gravityModifier;
+    f32 radius;
+    Color tint;
 } Entity;
 
 Entity EntityEmpty(Vector2 pos, f32 rad);

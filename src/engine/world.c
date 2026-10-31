@@ -6,27 +6,29 @@
 #include <raymath.h>
 
 void WorldHandleEntityVSEdgesCollision(World *self, Entity *entity, f32 dt) {
-    entity->pos = Vector2Add(entity->pos, Vector2Scale(entity->vel, dt));
-    entity->pos = Vector2Clamp(entity->pos, Vector2Zero(), self->size);
-    if (entity->pos.x <= entity->rad) {
-        entity->collision.x = 1;
-        entity->vel.x = 0;
-        entity->pos.x = entity->rad;
+    entity->position =
+        Vector2Add(entity->position, Vector2Scale(entity->velocity, dt));
+    entity->position =
+        Vector2Clamp(entity->position, Vector2Zero(), self->size);
+    if (entity->position.x <= entity->radius) {
+        entity->collisionNormal.x = 1;
+        entity->velocity.x = 0;
+        entity->position.x = entity->radius;
     }
-    if (entity->pos.x >= self->size.x - entity->rad) {
-        entity->collision.x = -1;
-        entity->vel.x = 0;
-        entity->pos.x = self->size.x - entity->rad;
+    if (entity->position.x >= self->size.x - entity->radius) {
+        entity->collisionNormal.x = -1;
+        entity->velocity.x = 0;
+        entity->position.x = self->size.x - entity->radius;
     }
-    if (entity->pos.y <= entity->rad) {
-        entity->collision.x = 1;
-        entity->vel.y = 0;
-        entity->pos.y = entity->rad;
+    if (entity->position.y <= entity->radius) {
+        entity->collisionNormal.x = 1;
+        entity->velocity.y = 0;
+        entity->position.y = entity->radius;
     }
-    if (entity->pos.y >= self->size.y - entity->rad) {
-        entity->collision.y = -1;
-        entity->vel.y = 0;
-        entity->pos.y = self->size.y - entity->rad;
+    if (entity->position.y >= self->size.y - entity->radius) {
+        entity->collisionNormal.y = -1;
+        entity->velocity.y = 0;
+        entity->position.y = self->size.y - entity->radius;
     }
 }
 
@@ -35,56 +37,69 @@ void WorldHandleEntityVSEntityCollision(World *self, Entity *entity,
     if (entity == other)
         return;
 
-    f32 radsum = entity->rad + other->rad;
-    f32 overlap = radsum - Vector2Distance(entity->pos, other->pos);
+    const f32 radsum = entity->radius + other->radius;
+    const f32 overlap =
+        radsum - Vector2Distance(entity->position, other->position);
     if (overlap <= 0)
         return;
-    Vector2 normalE =
-        Vector2Normalize(Vector2Subtract(other->pos, entity->pos));
-    Vector2 normalO = Vector2Negate(normalE);
+    const Vector2 normalE =
+        Vector2Normalize(Vector2Subtract(other->position, entity->position));
+    const Vector2 normalO = Vector2Negate(normalE);
 
-    entity->pos =
-        Vector2Subtract(entity->pos, Vector2Scale(normalE, overlap / 2));
-    other->pos =
-        Vector2Subtract(other->pos, Vector2Scale(normalO, overlap / 2));
+    EntityCollide(entity, other, normalE);
+    EntityCollide(other, entity, normalO);
 
-    Vector2 perpNormalE = Vector2Rotate(normalE, PI / 2.f);
-    Vector2 perpNormalO = Vector2Rotate(normalO, PI / 2.f);
-    f32 angleE = Vector2Angle(perpNormalE, Vector2Normalize(entity->vel));
-    f32 angleO = Vector2Angle(perpNormalO, Vector2Normalize(other->vel));
+    if (entity->collisionResolveType == COLRES_NONE ||
+        other->collisionResolveType == COLRES_NONE) {
+        return;
+    }
 
-    f32 velModE = Vector2Length(entity->vel);
-    f32 velModO = Vector2Length(other->vel);
+    const f32 pushValue = overlap / 2;
+    entity->position =
+        Vector2Subtract(entity->position, Vector2Scale(normalE, pushValue));
+    other->position =
+        Vector2Subtract(other->position, Vector2Scale(normalO, pushValue));
+    const f32 rightAngle = PI / 2.f;
+    const Vector2 perpNormalE = Vector2Rotate(normalE, rightAngle);
+    const Vector2 perpNormalO = Vector2Rotate(normalO, rightAngle);
+    const f32 angleE =
+        Vector2Angle(perpNormalE, Vector2Normalize(entity->velocity));
+    const f32 angleO =
+        Vector2Angle(perpNormalO, Vector2Normalize(other->velocity));
 
-    if (Vector2DotProduct(Vector2Normalize(entity->vel), normalE) > 0 ||
+    const f32 velModE = Vector2Length(entity->velocity);
+    const f32 velModO = Vector2Length(other->velocity);
+
+    // f32 weightModifierE = (other->weight / entity->weight);
+    // f32 weightModifierO = (entity->weight / other->weight);
+
+    if (Vector2DotProduct(Vector2Normalize(entity->velocity), normalE) > 0 ||
         velModO == 0) {
-        entity->vel = Vector2Scale(perpNormalE, cosf(angleE) * velModE);
+        entity->velocity = Vector2Scale(perpNormalE, cosf(angleE) * velModE);
     } else {
-        entity->vel = Vector2Scale(normalO, velModE);
+        entity->velocity = Vector2Scale(normalO, velModE);
     }
-
-    if (Vector2DotProduct(Vector2Normalize(other->vel), normalO) > 0 ||
+    if (Vector2DotProduct(Vector2Normalize(other->velocity), normalO) > 0 ||
         velModE == 0) {
-        other->vel = Vector2Scale(perpNormalO, cosf(angleO) * velModO);
+        other->velocity = Vector2Scale(perpNormalO, cosf(angleO) * velModO);
     } else {
-        other->vel = Vector2Scale(normalE, velModO);
+        other->velocity = Vector2Scale(normalE, velModO);
     }
-    // other->vel = Vector2Scale(perpNormalO, cosf(angleO) * velModO);
 }
 
 void WorldUpdate(World *self, f32 dt) {
     for (i32 i = 0; i < self->entities->size; i++) {
         Entity *entity = self->entities->items[i];
         EntityUpdate(entity, self, dt);
-        entity->vel = Vector2Add(
-            entity->vel,
+        entity->velocity = Vector2Add(
+            entity->velocity,
             Vector2Scale(
                 Vector2Multiply(self->gravity, entity->gravityModifier), dt));
-        WorldHandleEntityVSEdgesCollision(self, entity, dt);
         for (i32 j = 0; j < self->entities->size; j++) {
             WorldHandleEntityVSEntityCollision(self, entity,
                                                self->entities->items[j], dt);
         }
+        WorldHandleEntityVSEdgesCollision(self, entity, dt);
     }
 
     self->time += dt;

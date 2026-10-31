@@ -13,13 +13,13 @@ void PlayerUpdate(Entity *self, World *ctx, f32 dt) {
     f32 speed = 20;
 
     if (hor != 0) {
-        self->vel.x = speed * hor;
+        self->velocity.x = speed * hor;
     } else {
-        self->vel.x = FILerp(self->vel.x, 0.f, 0.01f, dt);
+        self->velocity.x = FILerp(self->velocity.x, 0.f, 0.01f, dt);
     }
 
     if (IsKeyPressed(KEY_SPACE)) {
-        self->vel.y = -speed * 2;
+        self->velocity.y = -speed * 2;
     }
 }
 
@@ -31,17 +31,19 @@ typedef struct _mmst {
 } MainMenuState;
 
 void _e_other_update(Entity *self, World *ctx, f32 dt) {
-    self->vel = Vector2Add(
-        self->vel, Vector2Scale(Vector2Normalize(Vector2Subtract(
-                                    ctx->entities->items[0]->pos, self->pos)),
-                                50 * dt));
+    self->velocity = Vector2Add(
+        self->velocity,
+        Vector2Scale(Vector2Normalize(Vector2Subtract(
+                         ctx->entities->items[0]->position, self->position)),
+                     200 * dt));
 }
 Texture shar;
 
 void EntityDrawTest(Entity *self, World *ctx) {
     Rectangle src = {0, 0, shar.width, shar.height};
-    Rectangle dst = {self->pos.x - self->rad, self->pos.y - self->rad,
-                     self->rad * 2, self->rad * 2};
+    Rectangle dst = {self->position.x - self->radius,
+                     self->position.y - self->radius, self->radius * 2,
+                     self->radius * 2};
     DrawTexturePro(shar, src, dst, Vector2Zero(), 0.f, RED);
 }
 
@@ -54,29 +56,27 @@ void _msc_load(AppState *s) {
     self->renderer.step = 0.01f;
     self->player = MemAlloc(sizeof(Entity));
     *self->player = EntityEmpty(Vector2Scale(self->world->size, 0.5f), 1.f);
-    self->player->update = PlayerUpdate;
+	self->player->tint = RED;
+	// self->player->collisionResolveType = COLRES_DYNAMIC;
+    self->player->on_update = PlayerUpdate;
 
     WorldEntityPush(self->world, self->player);
-    self->player->draw = EntityDrawTest;
-    for (i32 i = 0; i < 5; i++) {
+    for (i32 i = 0; i < 50; i++) {
         Entity *other = MemAlloc(sizeof(Entity));
         *other = EntityEmpty(
-            (Vector2){self->player->pos.x, self->player->pos.y}, 0.5f);
-        other->update = _e_other_update;
-        other->draw = EntityDrawTest;
+            (Vector2){self->player->position.x + i *0.01f, self->player->position.y - 1.f},
+            0.8f);
+        other->collisionResolveType = COLRES_DYNAMIC;
+        // other->on_update = _e_other_update;
+		other->tint = BLACK;
+        // other->gravityModifier = Vector2Zero();
         WorldEntityPush(self->world, other);
     }
-    Image sharImage = GenImageColor(512, 512, BLANK);
-    ImageDrawCircle(&sharImage, sharImage.width / 2, sharImage.height / 2,
-                    sharImage.width / 2, WHITE);
-    shar = LoadTextureFromImage(sharImage);
-    UnloadImage(sharImage);
 }
 
 void _msc_unload(AppState *s) {
     MainMenuState *self = (MainMenuState *)s;
     WorldDestroy(self->world);
-    UnloadTexture(shar);
 }
 
 void _msc_draw(AppState *s) {
@@ -94,7 +94,7 @@ void _msc_update(AppState *s, f32 dt) {
     if (IsKeyPressed(KEY_MINUS)) {
         self->renderer.zoom -= 0.1;
     }
-    self->renderer.target = self->player->pos;
+    self->renderer.target = self->player->position;
 }
 
 AppState *MainMenuState_New(bool started) {

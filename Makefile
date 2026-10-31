@@ -8,7 +8,7 @@ CC = gcc
 
 CCFLAGS += -std=c2x
 CCFLAGS += -Wall
-# CCFLAGS += -g
+CCFLAGS += -g
 CCFLAGS += -O3
 # LDFLAGS += -mwindows
 CCFLAGS += -static

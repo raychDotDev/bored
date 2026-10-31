@@ -2,6 +2,7 @@
 #include "hashtable.h"
 #include "types.h"
 #include <raylib.h>
+#include <stdio.h>
 
 HashTable *imageMap;
 HashTable *textureMap;
@@ -41,7 +42,7 @@ void _rmLoad() {
                 codepoints[i] = i;
             *f = LoadFontEx(path, 240, codepoints,
                             sizeof(codepoints) / sizeof(codepoints[0]));
-			SetTextureFilter(f->texture, TEXTURE_FILTER_POINT);
+            SetTextureFilter(f->texture, TEXTURE_FILTER_POINT);
             HTSet(fontMap, name, f);
         } else if (TextIsEqual(ext, ".locale")) {
             HashTable *table = HTCreate();
@@ -65,8 +66,19 @@ void _rmLoad() {
             UnloadTextLines(lines, lineCount);
             UnloadFileText(text);
             HTSet(langMap, name, table);
-            // TODO: NOT IMPLEMENTED
         }
+    }
+    if (!ResManGetResource("entity_default", RES_TEXTURE, nullptr)) {
+        Image *entity_default = MemAlloc(sizeof(Image));
+        *entity_default = GenImageColor(512, 512, BLANK);
+        ImageDrawCircle(entity_default, entity_default->width / 2,
+                        entity_default->width / 2, entity_default->width / 2,
+                        WHITE);
+        Texture *ed = MemAlloc(sizeof(Texture));
+        *ed = LoadTextureFromImage(*entity_default);
+        HTSet(imageMap, "entity_default", entity_default);
+        HTSet(textureMap, "entity_default", ed);
+		printf("AllSET!!!!\n");
     }
     TraceLog(LOG_INFO, "RESMAN: Loaded %d images", imageMap->count);
     TraceLog(LOG_INFO, "RESMAN: Loaded %d textures", textureMap->count);

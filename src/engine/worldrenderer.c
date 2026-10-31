@@ -68,12 +68,12 @@ void WorldRendererRender(WorldRenderer *self, World *ctx) {
                     bgp.y + bgp.height / 2 - size.y / 2,
                 },
                 Vector2Zero(), 0.f, fsize, fspacing, x);
-    for (i32 i = 0; i < ctx->entities->size; i++) {
+    for (i32 i = ctx->entities->size-1; i >= 0; i--) {
         Entity *e = ctx->entities->items[i];
         EntityDraw(e, ctx);
         DrawLineV(
-            e->pos,
-            Vector2Add(e->pos, Vector2Scale(Vector2Normalize(e->vel), e->rad)),
+            e->position,
+            Vector2Add(e->position, Vector2Scale(Vector2Normalize(e->velocity), e->radius)),
             GREEN);
     }
     EndMode2D();
